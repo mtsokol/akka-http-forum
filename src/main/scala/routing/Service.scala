@@ -85,8 +85,8 @@ object Service extends Directives with JsonSupport {
 
     val config = ConfigFactory.load()
 
-    //val bindingFuture = Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
-    val bindingFuture = Http().bindAndHandle(route, "localhost", 9000)
+    val bindingFuture = Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
+    //val bindingFuture = Http().bindAndHandle(route, "localhost", 9000)
 
     println(s"Running on port ${config.getInt("http.port")}...")
 
