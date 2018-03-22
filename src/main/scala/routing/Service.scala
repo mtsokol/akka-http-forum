@@ -1,0 +1,94 @@
+package routing
+
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.Directives
+import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
+import controllers.Controller.basicFun
+import models._
+import controllers._
+import spray.json._
+
+import scala.util.Success
+
+trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
+  implicit val answerFormat = jsonFormat6(Answer)
+  implicit val topicFormat = jsonFormat5(Topic)
+}
+
+object Service extends Directives with JsonSupport {
+
+  def main(args: Array[String]) {
+
+    implicit val system = ActorSystem("system")
+    implicit val materializer = ActorMaterializer()
+    implicit val executionContext = system.dispatcher
+
+    val route = {
+      pathPrefix("topics") {
+        pathEnd {
+          get {
+            parameters('sort ? "none", 'limit ? "50", 'offset ? "0") { (sort, limit, offset) =>
+              complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.test(1243).toString()))
+            }
+          } ~
+            post {
+              entity(as[Topic]) { topic =>
+                complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"post topic"))
+              }
+            }
+        } ~
+          pathPrefix(IntNumber) { (topicID) =>
+            pathEnd {
+              get {
+                parameters('mid ? "none", 'before ? "50", 'after ? "0") { (mid, before, after) =>
+                  onComplete(basicFun(2)) { case Success(value) =>
+                    complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, value.toString()))
+                  }
+                }
+              } ~
+                headerValueByName("WWW-Authenticate") { secret =>
+                  put {
+                    complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modify topic"))
+                  } ~
+                    delete {
+                      complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"delete topic"))
+                    }
+                }
+            } ~
+              pathPrefix("answers") {
+                pathEnd {
+                  post {
+                    entity(as[Answer]) { answer =>
+                      println(answer.content)
+                      complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"add answer"))
+                    }
+                  }
+                } ~
+                  path(IntNumber) { (answerID) =>
+                    headerValueByName("WWW-Authenticate") { secret =>
+                      put {
+                        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modify answer"))
+                      } ~
+                        delete {
+                          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"delete answer"))
+                        }
+                    }
+                  }
+              }
+          }
+      }
+    }
+
+    val config = ConfigFactory.load()
+
+    //val bindingFuture = Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
+    val bindingFuture = Http().bindAndHandle(route, "localhost", 9000)
+
+    println(s"Running on port ${config.getInt("http.port")}...")
+
+  }
+}
