@@ -1,0 +1,17 @@
+@(topics: Seq[(String, String, String)])
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Topics</title>
+    </head>
+    <body>
+        <h1>Topics</h1>
+        <ul>
+            @for(topic <- topics) {
+                <li>@topic._1 at @topic._2 by @topic._3</li>
+            }
+        </ul>
+    </body>
+</html>

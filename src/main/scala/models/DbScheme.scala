@@ -19,7 +19,7 @@ object DbScheme {
     def * = (id, nickname, email)
   }
 
-  val users = TableQuery[Users]
+  val UsersTable = TableQuery[Users]
 
   class Topics(tag: Tag) extends Table[(Int, Int, String, String, String)](tag, "topics") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
@@ -30,14 +30,14 @@ object DbScheme {
 
     def secret = column[String]("secret")
 
-    def comment = column[String]("content")
+    def content = column[String]("content")
 
-    def * = (id, userid, timestamp, secret, comment)
+    def * = (id, userid, timestamp, secret, content)
 
-    def supplier = foreignKey("topics_users_id_fk", id, users)(_.id)
+    def supplier = foreignKey("topics_users_id_fk", id, UsersTable)(_.id)
   }
 
-  val topics = TableQuery[Topics]
+  val TopicsTable = TableQuery[Topics]
 
   class Answers(tag: Tag) extends Table[(Int, Int, Int, String, String, String)](tag, "answers") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
@@ -50,16 +50,16 @@ object DbScheme {
 
     def secret = column[String]("secret")
 
-    def comment = column[String]("content")
+    def content = column[String]("content")
 
-    def * = (id, userid, topicid, timestamp, secret, comment)
+    def * = (id, userid, topicid, timestamp, secret, content)
 
-    def supplier = foreignKey("answers_users_id_fk", id, users)(_.id)
+    def supplier = foreignKey("answers_users_id_fk", id, UsersTable)(_.id)
 
-    def supplier2 = foreignKey("answers_topics_id_fk", id, topics)(_.id)
+    def supplier2 = foreignKey("answers_topics_id_fk", id, TopicsTable)(_.id)
   }
 
-  val Answers = TableQuery[Answers]
+  val AnswersTable = TableQuery[Answers]
 
   val db = Database.forConfig("dbconnection")
 }

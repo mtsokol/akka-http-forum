@@ -7,9 +7,8 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import controllers.Controller.basicFun
+import controllers.Controller.getTopics
 import models._
-import controllers._
 import spray.json._
 
 import scala.util.Success
@@ -31,8 +30,12 @@ object Service extends Directives with JsonSupport {
       pathPrefix("topics") {
         pathEnd {
           get {
-            parameters('sort ? "none", 'limit ? "50", 'offset ? "0") { (sort, limit, offset) =>
-              complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.test(1243).toString()))
+            parameters('sort ? "latest", 'limit ? 20, 'offset ? 0) { (sort, limit, offset) =>
+              onComplete(getTopics(sort, limit, offset)) {
+                case Success(value) =>
+                  complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topics(value).toString()))
+                case _ => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "failure"))
+              }
             }
           } ~
             post {
@@ -44,9 +47,10 @@ object Service extends Directives with JsonSupport {
           pathPrefix(IntNumber) { (topicID) =>
             pathEnd {
               get {
-                parameters('mid ? "none", 'before ? "50", 'after ? "0") { (mid, before, after) =>
-                  onComplete(basicFun(2)) { case Success(value) =>
-                    complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, value.toString()))
+                parameters('mid ? 1, 'before ? 0, 'after ? 50) { (mid, before, after) =>
+                  onComplete(getTopics("test", before, after)) {
+                    case Success(value) => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, value.toString()))
+                    case _ => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "failure"))
                   }
                 }
               } ~
@@ -85,8 +89,8 @@ object Service extends Directives with JsonSupport {
 
     val config = ConfigFactory.load()
 
-    val bindingFuture = Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
-    //val bindingFuture = Http().bindAndHandle(route, "localhost", 9000)
+    //val bindingFuture = Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
+    val bindingFuture = Http().bindAndHandle(route, "localhost", 9000)
 
     println(s"Running on port ${config.getInt("http.port")}...")
 
