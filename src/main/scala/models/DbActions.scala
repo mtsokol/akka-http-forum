@@ -9,14 +9,21 @@ object DbActions {
   def getTopics(sort: String, limit: Int, offset: Int) = {
     val action = for {
       (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
-    } yield (t.timestamp, t.content, u.nickname)
+    } yield (t.timestamp, t.subject, u.nickname)
 
     val action2 = action.drop(offset).take(limit).result
 
     db.run(action2)
   }
 
-  def createUser(user: User, topic: Topic) = {
+  def checkUser(user: User) = {
+    val insertActions = DBIO.seq(
+      UsersTable += user.toTuple
+    )
+    UsersTable.insertStatement
+  }
+
+  def createUser(user: User) = {
     val insertActions = DBIO.seq(
       UsersTable += user.toTuple
     )
@@ -37,8 +44,12 @@ object DbActions {
     db.run(action)
   }
 
-  def createTopic(user: User, topic: Topic) = {
-
+  def createTopic(topic: Topic) = {
+    val insertAction = DBIO.seq(
+      TopicsTable.map(x => (x.userid, x.secret, x.subject, x.content))
+        += (topic.userID, topic.secret, topic.subject, topic.content)
+    )
+    db.run(insertAction)
   }
 
   def createAnswer(user: User, answer: Answer) = {

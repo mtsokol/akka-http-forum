@@ -1,10 +1,6 @@
 package controllers
 
 import models.{DbActions, Topic, User}
-import models.DbScheme._
-import slick.jdbc.PostgresProfile.api._
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object Controller {
 
@@ -16,8 +12,8 @@ object Controller {
 
   }
 
-  def createTopic() = {
-
+  def createTopic(topic: Topic) = {
+    DbActions.createTopic(topic)
   }
 
   def createAnswer() = {

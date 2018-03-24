@@ -1,4 +1,6 @@
-@(topics: Seq[(String, String, String)])
+@import models.Topic
+
+@(topic: Topic, answers: Seq[(String, String, String)])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,12 +11,10 @@
     <body>
         <h1>Topics</h1>
         <a href="http://localhost:9000/posting">
-            <input type="button" value="Post topic" />
+            <input type="button" value="Post answer" />
         </a>
         <ul>
-            @for(topic <- topics) {
-                <li>@topic._1 at @topic._2 by @topic._3</li>
-            }
+
         </ul>
     </body>
 </html>

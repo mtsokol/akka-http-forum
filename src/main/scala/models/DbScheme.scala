@@ -21,7 +21,7 @@ object DbScheme {
 
   val UsersTable = TableQuery[Users]
 
-  class Topics(tag: Tag) extends Table[(Int, Int, String, String, String)](tag, "topics") {
+  class Topics(tag: Tag) extends Table[(Int, Int, String, String, String, String)](tag, "topics") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
     def userid = column[Int]("user_id")
@@ -30,9 +30,11 @@ object DbScheme {
 
     def secret = column[String]("secret")
 
+    def subject = column[String]("subject")
+
     def content = column[String]("content")
 
-    def * = (id, userid, timestamp, secret, content)
+    def * = (id, userid, timestamp, secret, subject, content)
 
     def supplier = foreignKey("topics_users_id_fk", id, UsersTable)(_.id)
   }

@@ -7,7 +7,7 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import controllers.Controller.getTopics
+import controllers.Controller._
 import models._
 import spray.json._
 
@@ -15,7 +15,7 @@ import scala.util.Success
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val answerFormat = jsonFormat6(Answer)
-  implicit val topicFormat = jsonFormat5(Topic)
+  implicit val topicFormat = jsonFormat6(Topic)
 }
 
 object Service extends Directives with JsonSupport {
@@ -27,6 +27,16 @@ object Service extends Directives with JsonSupport {
     implicit val executionContext = system.dispatcher
 
     val route = {
+      path("") {
+        get {
+          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.index().toString()))
+        }
+      } ~
+      path("posting") {
+        get {
+          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.posting().toString()))
+        }
+      } ~
       pathPrefix("topics") {
         pathEnd {
           get {
@@ -40,7 +50,11 @@ object Service extends Directives with JsonSupport {
           } ~
             post {
               entity(as[Topic]) { topic =>
-                complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"post topic"))
+                println(topic)
+                onComplete(createTopic(topic)) {
+                  case Success(xd) => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$xd post topic"))
+                  case _ => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"error"))
+                }
               }
             }
         } ~

@@ -1,0 +1,46 @@
+@()
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Topics</title>
+    </head>
+    <body>
+        <h1>New topic</h1>
+        <form id="myForm" name="myForm">
+            Nickname:<br>
+            <input type="text" name="timestamp"><br>
+            Email:<br>
+            <input type="text" name="secret"><br>
+            ID:<br>
+            <input type="number" name="ID"><br>
+            ID:<br>
+            <input type="number" name="userID"><br>
+                Content:<br>
+                <input type="text" name="content"><br>
+                Content:<br>
+                <input type="text" name="subject"><br>
+        </form>
+
+        <button onclick="send_request()">Submit</button>
+
+        <script>
+            function send_request() {
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', 'http://localhost:9000/topics', true);
+                xhr.setRequestHeader("Content-type", "application/json");
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        //var json = JSON.parse(xhr.responseText);
+                        console.log(xhr.responseText);
+                    }
+                };
+
+                var data = JSON.stringify(document.getElementById("myForm"));
+                xhr.send(data);
+            }
+        </script>
+
+    </body>
+</html>
