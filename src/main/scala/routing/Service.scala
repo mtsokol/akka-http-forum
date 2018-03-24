@@ -43,8 +43,8 @@ object Service extends Directives with JsonSupport {
             parameters('sort ? "latest", 'limit ? 20, 'offset ? 0) { (sort, limit, offset) =>
               onComplete(getTopics(sort, limit, offset)) {
                 case Success(value) =>
-                  complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topics(value).toString()))
-                case _ => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "failure"))
+                  complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topics(value).toString()))
+                case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
               }
             }
           } ~
@@ -52,8 +52,8 @@ object Service extends Directives with JsonSupport {
               entity(as[Topic]) { topic =>
                 println(topic)
                 onComplete(createTopic(topic)) {
-                  case Success(xd) => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$xd post topic"))
-                  case _ => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"error"))
+                  case Success(xd) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$xd posted topic"))
+                  case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "error"))
                 }
               }
             }
@@ -63,17 +63,25 @@ object Service extends Directives with JsonSupport {
               get {
                 parameters('mid ? 1, 'before ? 0, 'after ? 50) { (mid, before, after) =>
                   onComplete(getTopics("test", before, after)) {
-                    case Success(value) => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, value.toString()))
-                    case _ => complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "failure"))
+                    case Success(value) => complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, value.toString()))
+                    case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "error"))
                   }
                 }
               } ~
                 headerValueByName("WWW-Authenticate") { secret =>
                   put {
-                    complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modify topic"))
+                    complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modify topic"))
                   } ~
                     delete {
-                      complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"delete topic"))
+                      onComplete(deleteTopic(topicID, secret)) {
+                        case Success(value) => value match {
+                          case None =>
+                            complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, "wrong secret"))
+                          case Some(stat) =>
+                            complete(204, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$stat deleted"))
+                        }
+                        case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                      }
                     }
                 }
             } ~
