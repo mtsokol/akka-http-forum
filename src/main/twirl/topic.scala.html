@@ -1,20 +1,23 @@
-@import models.Topic
-
-@(topic: Topic, answers: Seq[(String, String, String)])
+@(answers: Seq[(Int, Int, Int, String, String, String)], topics: Seq[(String, String, String)])
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Topics</title>
+        <title>Topic</title>
     </head>
     <body>
-        <h1>Topics</h1>
-        <a href="http://localhost:9000/posting">
-            <input type="button" value="Post answer" />
+        <h1>Topic</h1>
+        <a href="http://localhost:9000/posting?kind=answer">
+            <input type="button" value="answer for this topic" />
         </a>
+            @for(topic <- topics) {
+                <h2>Topic: @topic._2</h2>
+            }
         <ul>
-
+            @for(answer <- answers) {
+                <li>@answer._1</li>
+            }
         </ul>
     </body>
 </html>

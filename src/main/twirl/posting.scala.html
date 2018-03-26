@@ -1,46 +1,74 @@
-@()
+@(kind: String, topicID: Option[Int] = None)
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Topics</title>
+        <title>
+            @if(kind == "topic") {
+                Topics
+            } else {
+                Answers
+            }
+        </title>
     </head>
     <body>
-        <h1>New topic</h1>
-        <form id="myForm" name="myForm">
-            Nickname:<br>
-            <input type="text" name="timestamp"><br>
-            Email:<br>
-            <input type="text" name="secret"><br>
-            ID:<br>
-            <input type="number" name="ID"><br>
-            ID:<br>
-            <input type="number" name="userID"><br>
-                Content:<br>
-                <input type="text" name="content"><br>
-                Content:<br>
-                <input type="text" name="subject"><br>
-        </form>
+        @if(kind == "topic") {
+            <h1>New topic</h1>
+        } else {
+            <h1>New answer</h1>
+        }
+
+        Nickname:<br>
+        <input id="timestamp" type="text" name="timestamp" title="timestamp"><br>
+        Email:<br>
+        <input id="secret" type="text" name="secret"><br>
+        ID:<br>
+        <input id="ID" type="number" name="ID"><br>
+        ID:<br>
+        <input id="userID" type="number" name="userID"><br>
+        Content:<br>
+        <input id="content" type="text" name="content"><br>
+        Content:<br>
+        <input id="subject" type="text" name="subject"><br>
+
 
         <button onclick="send_request()">Submit</button>
 
         <script>
-            function send_request() {
-                var xhr = new XMLHttpRequest();
-                xhr.open('POST', 'http://localhost:9000/topics', true);
-                xhr.setRequestHeader("Content-type", "application/json");
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        //var json = JSON.parse(xhr.responseText);
-                        console.log(xhr.responseText);
+                function form_to_json() {
+                    var a = document.getElementById("timestamp").value;
+                    var b = document.getElementById("secret").value;
+                    var c = document.getElementById("userID").value;
+                    var d = document.getElementById("subject").value;
+                    var e = document.getElementById("content").value;
+                    var json = `{"ID":1,"secret":"${b}","userID":${c},"timestamp":"${a}","subject":"${d}","content":"${e}"}`;
+                    return json
+                }
+
+                function send_request() {
+
+                    var routing;
+                    @if(kind == "topics") {
+                    routing = "topics";
+                    } else {
+                    routing = "topics/" + @topicID.get + "/answers"; //to refactor
                     }
-                };
 
-                var data = JSON.stringify(document.getElementById("myForm"));
-                xhr.send(data);
-            }
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'http://localhost:9000/' + routing, true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === 4 && xhr.status === 200) {
+                            console.log(xhr.responseText);
+                        }
+                    };
+                    xhr.send(form_to_json());
+
+                    setTimeout(function(){
+                        window.location.href = "http://localhost:9000/topics";
+                    }, 2000);
+                }
         </script>
-
     </body>
 </html>

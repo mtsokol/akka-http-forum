@@ -11,9 +11,12 @@ object Controller extends Directives {
     DbActions.getTopics(sort, limit, offset)
   }
 
-  def getTopic(topic: Topic) = {
-    DbActions.getTopic(topic)
-    DbActions.getAnswers(1,1,1,1)
+  def getTopic(topicID: Int, mid: Int, before: Int, after: Int) = {
+    DbActions.getAnswers(topicID, mid, before, after).flatMap {
+      case e => DbActions.getTopic(topicID).map {
+        case a => (e,a)
+      }
+    }
   }
 
   def createTopic(topic: Topic) = {
@@ -27,8 +30,7 @@ object Controller extends Directives {
   def modifyTopic(topic: Topic) = {
     DbActions.validateSecret("Answer", topic.ID, topic.secret).flatMap {
       case i +: rest => DbActions.modifyTopic(topic).map {
-        case stat: Int => Some(stat)
-        case _ => None
+        stat: Int => Some(stat)
       }
       case IndexedSeq() => Future { None }
     }

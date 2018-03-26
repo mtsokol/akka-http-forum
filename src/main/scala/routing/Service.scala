@@ -32,9 +32,14 @@ object Service extends Directives with JsonSupport {
           complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.index().toString()))
         }
       } ~
+      pathPrefix("resources") {
+        getFromDirectory("src/main/resources")
+      } ~
       path("posting") {
         get {
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.posting().toString()))
+          parameters('kind ? "topic") { kind =>
+            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.posting(kind).toString()))
+          }
         }
       } ~
       pathPrefix("topics") {
@@ -50,7 +55,6 @@ object Service extends Directives with JsonSupport {
           } ~
             post {
               entity(as[Topic]) { topic =>
-                println(topic)
                 onComplete(createTopic(topic)) {
                   case Success(xd) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$xd posted topic"))
                   case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "error"))
@@ -62,8 +66,8 @@ object Service extends Directives with JsonSupport {
             pathEnd {
               get {
                 parameters('mid ? 1, 'before ? 0, 'after ? 50) { (mid, before, after) =>
-                  onComplete(getTopics("test", before, after)) {
-                    case Success(value) => complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, value.toString()))
+                  onComplete(getTopic(topicID, mid, before, after)) {
+                    case Success(value) => complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topic(value._1, value._2).toString()))
                     case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "error"))
                   }
                 }
