@@ -1,15 +1,13 @@
 package models
 
-case class User(ID: Int, nick: String, email: String) {
-  def toTuple = (ID, nick, email)
+case class User(nick: String, email: String) {
+  def toTuple = (nick, email)
 }
 
-case class Topic(ID: Int, userID: Int, timestamp: String, secret: String, subject: String,
-                 content: String) {
-  def toTuple = (ID, userID, timestamp, secret, subject, content)
+case class Topic(user: User, subject: String, content: String) {
+  def toTuple = (user.toTuple, subject, content)
 }
 
-case class Answer(ID: Int, userID: Int, topicID: Int, timestamp: String, secret: String,
-                  content: String) {
-  def toTuple = (ID, userID, topicID, timestamp, secret, content)
+case class Answer(user: User, content: String) {
+  def toTuple = (user.toTuple, content)
 }

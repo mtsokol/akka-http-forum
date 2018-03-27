@@ -20,26 +20,36 @@ object Controller extends Directives {
   }
 
   def createTopic(topic: Topic) = {
-    DbActions.createTopic(topic)
+    DbActions.checkUser(topic.user).flatMap {
+      case IndexedSeq() => DbActions.createUser(topic.user).flatMap {
+        case id => DbActions.createTopic(topic, id)
+      }
+      case i +: _ => DbActions.createTopic(topic, i._1)
+    }
   }
 
-  def createAnswer(answer: Answer) = {
-    DbActions.createAnswer(answer)
+  def createAnswer(answer: Answer, topicID: Int) = {
+    DbActions.checkUser(answer.user).flatMap {
+      case IndexedSeq() => DbActions.createUser(answer.user).flatMap {
+        case id => DbActions.createAnswer(answer, topicID, id)
+      }
+      case i +: _ => DbActions.createAnswer(answer, topicID, i._1)
+    }
   }
 
-  def modifyTopic(topic: Topic) = {
-    DbActions.validateSecret("Answer", topic.ID, topic.secret).flatMap {
-      case i +: rest => DbActions.modifyTopic(topic).map {
+  def modifyTopic(topicID: Int, secret: String, newContent: String) = {
+    DbActions.validateSecret("Topic", topicID, secret).flatMap {
+      case i +: rest => DbActions.modifyTopic(topicID, newContent).map {
         stat: Int => Some(stat)
       }
       case IndexedSeq() => Future { None }
     }
   }
 
-  def modifyAnswer(answer: Answer): Future[Option[Int]] = {
-    DbActions.validateSecret("Answer", answer.ID, answer.secret).flatMap {
+  def modifyAnswer(answerID: Int, secret: String, newContent: String): Future[Option[Int]] = {
+    DbActions.validateSecret("Answer", answerID, secret).flatMap {
       case e +: _ => for {
-        result <- DbActions.modifyAnswer(answer)
+        result <- DbActions.modifyAnswer(answerID, newContent)
       } yield Some(result)
       case IndexedSeq() => Future { None }
     }

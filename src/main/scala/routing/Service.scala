@@ -14,8 +14,9 @@ import spray.json._
 import scala.util.Success
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
-  implicit val answerFormat = jsonFormat6(Answer)
-  implicit val topicFormat = jsonFormat6(Topic)
+  implicit val userFormat = jsonFormat2(User)
+  implicit val answerFormat = jsonFormat2(Answer)
+  implicit val topicFormat = jsonFormat3(Topic)
 }
 
 object Service extends Directives with JsonSupport {
@@ -37,8 +38,8 @@ object Service extends Directives with JsonSupport {
       } ~
       path("posting") {
         get {
-          parameters('kind ? "topic") { kind =>
-            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.posting(kind).toString()))
+          parameters('topic ? "") { topic =>
+            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.posting(topic).toString()))
           }
         }
       } ~
@@ -56,8 +57,8 @@ object Service extends Directives with JsonSupport {
             post {
               entity(as[Topic]) { topic =>
                 onComplete(createTopic(topic)) {
-                  case Success(xd) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$xd posted topic"))
-                  case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "error"))
+                  case Success(x) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$x posted topic"))
+                  case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
                 }
               }
             }
@@ -65,22 +66,31 @@ object Service extends Directives with JsonSupport {
           pathPrefix(IntNumber) { (topicID) =>
             pathEnd {
               get {
-                parameters('mid ? 1, 'before ? 0, 'after ? 50) { (mid, before, after) =>
+                parameters('mid ? 0, 'before ? 0, 'after ? 50) { (mid, before, after) =>
                   onComplete(getTopic(topicID, mid, before, after)) {
                     case Success(value) => complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topic(value._1, value._2).toString()))
-                    case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "error"))
+                    case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
                   }
                 }
               } ~
                 headerValueByName("WWW-Authenticate") { secret =>
                   put {
-                    complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modify topic"))
+                    entity(as[String]) { content =>
+                      onComplete(modifyTopic(topicID, secret, content)) {
+                        case Success(value) => value match {
+                          case Some(x) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"topic modified $x"))
+                          case None => complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"invalid secret"))
+                        }
+                        case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+
+                      }
+                    }
                   } ~
                     delete {
                       onComplete(deleteTopic(topicID, secret)) {
                         case Success(value) => value match {
                           case None =>
-                            complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, "wrong secret"))
+                            complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, "invalid secret"))
                           case Some(stat) =>
                             complete(204, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$stat deleted"))
                         }
@@ -93,18 +103,21 @@ object Service extends Directives with JsonSupport {
                 pathEnd {
                   post {
                     entity(as[Answer]) { answer =>
-                      println(answer.content)
-                      complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"add answer"))
+                      onComplete(createAnswer(answer, topicID)) {
+                        case Success(x) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"added answer"))
+                        case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"internal error"))
+                      }
+
                     }
                   }
                 } ~
                   path(IntNumber) { (answerID) =>
                     headerValueByName("WWW-Authenticate") { secret =>
                       put {
-                        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modify answer"))
+                        complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modify answer"))
                       } ~
                         delete {
-                          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, s"delete answer"))
+                          complete(204, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"delete answer"))
                         }
                     }
                   }

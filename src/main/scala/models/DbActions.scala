@@ -22,9 +22,9 @@ object DbActions {
   }
 
   def createUser(user: User) = {
-    val insertActions = DBIO.seq(
-      UsersTable += user.toTuple
-    )
+    val insertActions =
+      UsersTable.map(x=>(x.nickname, x.email)).returning(UsersTable.map(_.id)) += user.toTuple
+
     db.run(insertActions)
   }
 
@@ -42,31 +42,31 @@ object DbActions {
     db.run(action)
   }
 
-  def createTopic(topic: Topic) = {
+  def createTopic(topic: Topic, userID: Int) = {
     val insertAction = DBIO.seq(
       TopicsTable.map(x => (x.userid, x.secret, x.subject, x.content))
-        += (topic.userID, topic.secret, topic.subject, topic.content)
+        += (userID, SecretGenerator.generateSecret(), topic.subject, topic.content)
     )
     db.run(insertAction)
   }
 
-  def createAnswer(answer: Answer) = {
+  def createAnswer(answer: Answer, topicID: Int, userID: Int) = {
     val insertAction = DBIO.seq(
       AnswersTable.map(x => (x.userid, x.topicid, x.secret, x.content))
-        += (answer.userID, answer.topicID,answer.secret, answer.content)
+        += (userID, topicID, SecretGenerator.generateSecret(), answer.content)
     )
     db.run(insertAction)
   }
 
-  def modifyTopic(newContent: Topic) = {
-    val q = for { t <- TopicsTable if t.id === newContent.ID } yield t
-    val updateAction = q.update(newContent.toTuple)
+  def modifyTopic(topicID: Int, newContent: String) = {
+    val q = for { t <- TopicsTable if t.id === topicID } yield t.content
+    val updateAction = q.update(newContent)
     db.run(updateAction)
   }
 
-  def modifyAnswer(newContent: Answer) = {
-    val q = for { t <- AnswersTable if t.id === newContent.ID } yield t
-    val updateAction = q.update(newContent.toTuple)
+  def modifyAnswer(answerID: Int, newContent: String) = {
+    val q = for { t <- AnswersTable if t.id === answerID } yield t.content
+    val updateAction = q.update(newContent)
     db.run(updateAction)
   }
 

@@ -1,36 +1,48 @@
-@(kind: String, topicID: Option[Int] = None)
+@(topicID: String)
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <title>
-            @if(kind == "topic") {
-                Topics
-            } else {
-                Answers
+            @topicID match {
+                case "" => {
+                    Topics
+                }
+                case id => {
+                    Answers
+                }
             }
         </title>
     </head>
     <body>
-        @if(kind == "topic") {
-            <h1>New topic</h1>
-        } else {
-            <h1>New answer</h1>
+        @topicID match {
+            case "" => {
+                <h1>New topic</h1>
+            }
+            case id => {
+                <h1>New answer</h1>
+            }
         }
 
         Nickname:<br>
-        <input id="timestamp" type="text" name="timestamp" title="timestamp"><br>
+        <input id="timestamp" type="text" name="timestamp" title="timestamp">
+        <br>
         Email:<br>
-        <input id="secret" type="text" name="secret"><br>
+        <input id="secret" type="text" name="secret">
+        <br>
         ID:<br>
-        <input id="ID" type="number" name="ID"><br>
+        <input id="ID" type="number" name="ID">
+        <br>
         ID:<br>
-        <input id="userID" type="number" name="userID"><br>
+        <input id="userID" type="number" name="userID">
+        <br>
         Content:<br>
-        <input id="content" type="text" name="content"><br>
+        <input id="content" type="text" name="content">
+        <br>
         Content:<br>
-        <input id="subject" type="text" name="subject"><br>
+        <input id="subject" type="text" name="subject">
+        <br>
 
 
         <button onclick="send_request()">Submit</button>
@@ -49,11 +61,15 @@
                 function send_request() {
 
                     var routing;
-                    @if(kind == "topics") {
-                    routing = "topics";
-                    } else {
-                    routing = "topics/" + @topicID.get + "/answers"; //to refactor
+                    @topicID match {
+                        case "" => {
+                            routing = "topic";
+                        }
+                        case id => {
+                            routing = "topics/" + @id +"/answers";
+                        }
                     }
+
 
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', 'http://localhost:9000/' + routing, true);
@@ -65,7 +81,7 @@
                     };
                     xhr.send(form_to_json());
 
-                    setTimeout(function(){
+                    setTimeout(function () {
                         window.location.href = "http://localhost:9000/topics";
                     }, 2000);
                 }
