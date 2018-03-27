@@ -68,7 +68,10 @@ object Service extends Directives with JsonSupport {
               get {
                 parameters('mid ? 0, 'before ? 0, 'after ? 50) { (mid, before, after) =>
                   onComplete(getTopic(topicID, mid, before, after)) {
-                    case Success(value) => complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topic(value._1, value._2).toString()))
+                    case Success(value) => value match {
+                      case Some(tuple) => complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topic(tuple._1, tuple._2).toString()))
+                      case None => complete(404, HttpEntity(ContentTypes.`text/html(UTF-8)`, "No such topic"))
+                    }
                     case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
                   }
                 }
@@ -114,7 +117,7 @@ object Service extends Directives with JsonSupport {
                   path(IntNumber) { (answerID) =>
                     headerValueByName("WWW-Authenticate") { secret =>
                       put {
-                        complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modify answer"))
+                        complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modified answer"))
                       } ~
                         delete {
                           complete(204, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"delete answer"))

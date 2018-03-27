@@ -13,9 +13,10 @@ object Controller extends Directives {
 
   def getTopic(topicID: Int, mid: Int, before: Int, after: Int) = {
     DbActions.getAnswers(topicID, mid, before, after).flatMap {
-      case e => DbActions.getTopic(topicID).map {
-        case a => (e,a)
-      }
+      answers => DbActions.getTopic(topicID).map {
+          case IndexedSeq() => None
+          case topic => Some((answers, topic))
+        }
     }
   }
 

@@ -8,7 +8,7 @@ object DbActions {
   def getTopics(sort: String, limit: Int, offset: Int) = { //TODO sorting
     val action = for {
       (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
-    } yield (t.id, t.timestamp, t.subject, u.nickname)
+    } yield (t.id, t.subject, u.nickname, t.timestamp)
 
     val action2 = action.drop(offset).take(limit).result
 

@@ -4,6 +4,9 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
         <title>
             @topicID match {
                 case "" => {
@@ -16,45 +19,54 @@
         </title>
     </head>
     <body>
-        @topicID match {
-            case "" => {
-                <h1>New topic</h1>
+        <header class="topbar">
+            <h1 class="fill" id="header-title">
+                <a href="#">
+                    Akka HTTP - Forum Template
+                </a>
+            </h1>
+        </header>
+
+        <div class="container">
+            @topicID match {
+                case "" => {
+                    <h2>New topic</h2>
+                }
+                case id => {
+                    <h2>New answer</h2>
+                }
             }
-            case id => {
-                <h1>New answer</h1>
-            }
-        }
 
-        Nickname:<br>
-        <input id="timestamp" type="text" name="timestamp" title="timestamp">
-        <br>
-        Email:<br>
-        <input id="secret" type="text" name="secret">
-        <br>
-        ID:<br>
-        <input id="ID" type="number" name="ID">
-        <br>
-        ID:<br>
-        <input id="userID" type="number" name="userID">
-        <br>
-        Content:<br>
-        <input id="content" type="text" name="content">
-        <br>
-        Content:<br>
-        <input id="subject" type="text" name="subject">
-        <br>
+            <p>Create new topic by filling form below</p>
+            <form>
+                <div class="form-group">
+                    <label for="nickname">Nickname:</label>
+                    <input type="text" class="form-control" id="nickname">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" class="form-control" id="email">
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" class="form-control" id="subject">
+                </div>
+                <div class="form-group">
+                    <label for="content">Content:</label>
+                    <input type="text" class="form-control" id="content">
+                </div>
+            </form>
+        </div>
 
-
-        <button onclick="send_request()">Submit</button>
+        <button type="button" class="btn btn-success" onclick="send_request()">Submit</button>
 
         <script>
                 function form_to_json() {
-                    var a = document.getElementById("timestamp").value;
-                    var b = document.getElementById("secret").value;
-                    var c = document.getElementById("userID").value;
-                    var d = document.getElementById("subject").value;
-                    var e = document.getElementById("content").value;
-                    var json = `{"ID":1,"secret":"${b}","userID":${c},"timestamp":"${a}","subject":"${d}","content":"${e}"}`;
+                    var a = document.getElementById("nickname").value;
+                    var b = document.getElementById("email").value;
+                    var c = document.getElementById("subject").value;
+                    var d = document.getElementById("content").value;
+                    var json = `{"user":{"nick":"${a}","email":"${b}"},"subject":"${c}","content":"${d}"}`;
                     return json
                 }
 
@@ -63,7 +75,7 @@
                     var routing;
                     @topicID match {
                         case "" => {
-                            routing = "topic";
+                            routing = "topics";
                         }
                         case id => {
                             routing = "topics/" + @id +"/answers";
@@ -80,6 +92,8 @@
                         }
                     };
                     xhr.send(form_to_json());
+
+
 
                     setTimeout(function () {
                         window.location.href = "http://localhost:9000/topics";
