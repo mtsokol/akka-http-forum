@@ -1,9 +1,10 @@
 package controllers
 
-import models.{Answer, DbActions, Topic}
+import models._
 import akka.http.scaladsl.server.Directives
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import models.DbActionsWithValidation._
 
 object Controller extends Directives {
 
@@ -20,21 +21,39 @@ object Controller extends Directives {
     }
   }
 
-  def createTopic(topic: Topic) = {
+  def createTopic(topic: Topic): Future[Response] = {
     DbActions.checkUser(topic.user).flatMap {
-      case IndexedSeq() => DbActions.createUser(topic.user).flatMap {
-        case id => DbActions.createTopic(topic, id)
+      case IndexedSeq() => createUserWithValidation(topic.user).fold(
+          Future(Failure("Invalid user params").asInstanceOf[Response])
+      ){ x =>
+        x.flatMap(id => createTopicWithValidation(topic, id).fold(
+          Future(Failure("Invalid topic params").asInstanceOf[Response])
+        ){ y => y
+        })
       }
-      case i +: _ => DbActions.createTopic(topic, i._1)
+      case user +: _ => createTopicWithValidation(topic, user._1).fold(
+        Future(Failure("Invalid topic params").asInstanceOf[Response])
+      ) {
+        y => y
+      }
     }
   }
 
-  def createAnswer(answer: Answer, topicID: Int) = {
+  def createAnswer(answer: Answer, topicID: Int): Future[Response] = {
     DbActions.checkUser(answer.user).flatMap {
-      case IndexedSeq() => DbActions.createUser(answer.user).flatMap {
-        case id => DbActions.createAnswer(answer, topicID, id)
+      case IndexedSeq() => createUserWithValidation(answer.user).fold(
+        Future(Failure("Invalid user params").asInstanceOf[Response])
+      ){ x =>
+        x.flatMap(id => createAnswerWithValidation(answer, topicID, id).fold(
+          Future(Failure("Invalid answer params").asInstanceOf[Response])
+        ){ y => y
+        })
       }
-      case i +: _ => DbActions.createAnswer(answer, topicID, i._1)
+      case i +: _ => createAnswerWithValidation(answer, topicID, i._1).fold(
+        Future(Failure("Invalid answer params").asInstanceOf[Response])
+      ) {
+        y => y
+      }
     }
   }
 

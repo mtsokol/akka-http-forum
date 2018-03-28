@@ -2,6 +2,8 @@ package models
 
 import models.DbScheme._
 import slick.jdbc.PostgresProfile.api._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object DbActions {
 
@@ -10,7 +12,17 @@ object DbActions {
       (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
     } yield (t.id, t.subject, u.nickname, t.timestamp)
 
-    val action2 = action.drop(offset).take(limit).result
+    val action2 = action.sortBy(_._4).drop(offset).take(limit).result
+
+    val a = sql"""
+                 |SELECT t.id,
+                 |  (SELECT a.timestamp FROM answers as a INNER JOIN topics AS t2 ON a.topic_id = t2.id WHERE t.id = t2.id
+                 |  GROUP BY t2.id, a.timestamp ORDER BY a.timestamp LIMIT 1) AS xd FROM topics AS t ORDER BY xd
+       """
+
+//    val action3 = for {
+//      (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
+//    }
 
     db.run(action2)
   }
@@ -42,20 +54,22 @@ object DbActions {
     db.run(action)
   }
 
-  def createTopic(topic: Topic, userID: Int) = {
+  def createTopic(topic: Topic, userID: Int): Future[Response] = {
+    val secret = SecretGenerator.getSecret
     val insertAction = DBIO.seq(
       TopicsTable.map(x => (x.userid, x.secret, x.subject, x.content))
-        += (userID, SecretGenerator.generateSecret(), topic.subject, topic.content)
+        += (userID, secret, topic.subject, topic.content)
     )
-    db.run(insertAction)
+    db.run(insertAction).map(_ => Success(secret) )
   }
 
-  def createAnswer(answer: Answer, topicID: Int, userID: Int) = {
+  def createAnswer(answer: Answer, topicID: Int, userID: Int): Future[Response] = {
+    val secret = SecretGenerator.getSecret
     val insertAction = DBIO.seq(
       AnswersTable.map(x => (x.userid, x.topicid, x.secret, x.content))
-        += (userID, topicID, SecretGenerator.generateSecret(), answer.content)
+        += (userID, topicID, secret, answer.content)
     )
-    db.run(insertAction)
+    db.run(insertAction).map(_ => Success(secret) )
   }
 
   def modifyTopic(topicID: Int, newContent: String) = {

@@ -57,7 +57,10 @@ object Service extends Directives with JsonSupport {
             post {
               entity(as[Topic]) { topic =>
                 onComplete(createTopic(topic)) {
-                  case Success(x) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$x posted topic"))
+                  case Success(response) => response match {
+                    case models.Success(msg) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, msg))
+                    case Failure(msg) => complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, msg))
+                  }
                   case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
                 }
               }
@@ -107,7 +110,10 @@ object Service extends Directives with JsonSupport {
                   post {
                     entity(as[Answer]) { answer =>
                       onComplete(createAnswer(answer, topicID)) {
-                        case Success(x) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"added answer"))
+                        case Success(response) => response match {
+                          case models.Success(msg) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, msg))
+                          case Failure(msg) => complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, msg))
+                        }
                         case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"internal error"))
                       }
 
