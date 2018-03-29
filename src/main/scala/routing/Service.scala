@@ -10,7 +10,6 @@ import com.typesafe.config.ConfigFactory
 import controllers.Controller._
 import models._
 import spray.json._
-
 import scala.util.Success
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {

@@ -1,9 +1,12 @@
 package models
 
+import com.typesafe.config.ConfigFactory
 import models.DbActions._
 import scala.concurrent.Future
 
 object DbActionsWithValidation {
+
+  val confLimit: Int = ConfigFactory.load().getInt("limit.max")
 
   def createUserWithValidation(user: User): Option[Future[Int]] = {
     if (validateUserParams(user)) {
@@ -29,12 +32,35 @@ object DbActionsWithValidation {
     }
   }
 
+  def getTopicsWithValidation(sort: String, limit: Int, offset: Int) = {
+    if (validatePaginationTopics(limit, offset)) {
+      DbActions.getTopics(sort, limit, offset)
+    } else {
+      DbActions.getTopics(sort, confLimit, offset)
+    }
+  }
+
+  def getAnswersWithValidation(id: Int, mid: Int, before: Int, after: Int) = {
+    if (validatePaginationAnswers(before, after)) {
+      DbActions.getAnswers(id, mid, before, after)
+    } else {
+      val pagination = getCorrectPaginationAnswers(before, after)
+      DbActions.getAnswers(id, mid, pagination._1, pagination._2)
+    }
+  }
+
   private def validatePaginationTopics(limit: Int, offset: Int) = {
-    ""
+    limit < confLimit
   }
 
   private def validatePaginationAnswers(before: Int, after: Int) = {
-    ""
+    before + after + 1 < confLimit
+  }
+
+  private def getCorrectPaginationAnswers(before: Int, after: Int) = {
+    val newBefore: Double = before/(before+after)
+    val newAfter: Double = after/(before+after)
+    ((confLimit*newBefore).toInt, (confLimit*newAfter).toInt)
   }
 
   private def validateUserParams(user: User) = {
@@ -44,9 +70,9 @@ object DbActionsWithValidation {
   }
 
   private def validateContent(contents: Contents) = contents match {
-    case t: Topic => t.subject.length > 1 && t.subject.length < 50 &&
+    case t: Topic => t.subject.length > 1 && t.subject.length < 200 &&
      t.content.length > 3 && t.content.length < 1000
-    case a: Answer => true
+    case a: Answer => a.content.length > 1 && a.content.length < 1000
   }
 
 }

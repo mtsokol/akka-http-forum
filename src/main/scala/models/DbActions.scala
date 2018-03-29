@@ -7,51 +7,52 @@ import scala.concurrent.Future
 
 object DbActions {
 
-  def getTopics(sort: String, limit: Int, offset: Int) = { //TODO sorting
-    val action = for {
-      (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
-    } yield (t.id, t.subject, u.nickname, t.timestamp)
-
-    val action2 = action.sortBy(_._4).drop(offset).take(limit).result
-
-    val a = sql"""
-                 |SELECT t.id,
-                 |  (SELECT a.timestamp FROM answers as a INNER JOIN topics AS t2 ON a.topic_id = t2.id WHERE t.id = t2.id
-                 |  GROUP BY t2.id, a.timestamp ORDER BY a.timestamp LIMIT 1) AS xd FROM topics AS t ORDER BY xd
-       """
-
-//    val action3 = for {
-//      (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
-//    }
-
-    db.run(action2)
+  def getTopics(sort: String, limit: Int, offset: Int): Future[Seq[(Int, String, String, String)]] = {
+    sort match {
+      case "latest" =>
+        val action = for {
+          (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
+        } yield (t.id, t.subject, u.nickname, t.timestamp)
+        val action2 = action.sortBy(_._4).drop(offset).take(limit).result
+        db.run(action2)
+      case "popular" =>
+        val query = sql"""
+                     |SELECT t.id, t.subject,
+                     |  (SELECT a.timestamp FROM answers as a INNER JOIN topics AS t2 ON a.topic_id = t2.id WHERE t.id = t2.id
+                     |  GROUP BY t2.id, a.timestamp ORDER BY a.timestamp LIMIT 1) AS xd, users.nickname, t.timestamp FROM topics
+                     |  AS t INNER JOIN users ON t.user_id = users.id ORDER BY xd
+       """.as[(Int, String, String, String, String)].map(x => x.map(y => (y._1, y._2, y._4, y._5)))
+        db.run(query)
+      case _ => Future { Seq() }
+    }
   }
 
-  def checkUser(user: User) = {
+  def checkUser(user: User): Future[Seq[(Int, String, String)]] = {
     val action = UsersTable.filter(u => u.nickname === user.nick
       && u.email === user.email).result
     db.run(action)
   }
 
-  def createUser(user: User) = {
+  def createUser(user: User): Future[Int] = {
     val insertActions =
       UsersTable.map(x=>(x.nickname, x.email)).returning(UsersTable.map(_.id)) += user.toTuple
 
     db.run(insertActions)
   }
 
-  def getTopic(topicID: Int) = {
+  def getTopic(topicID: Int): Future[Seq[(String, String, String, String)]] = {
     val action = for {
       (t, u) <- TopicsTable join UsersTable on (_.userid === _.id) if t.id === topicID
-    } yield (t.timestamp, t.content, u.nickname)
+    } yield (t.subject, t.timestamp, t.content, u.nickname)
 
     db.run(action.result)
   }
 
   def getAnswers(id: Int, mid: Int, before: Int, after: Int) = {
-    val action = AnswersTable.filter(_.topicid === id).sortBy(_.id)
-      .drop(mid-before).take(after).result
-    db.run(action)
+    val action = for {
+      (a, u) <- AnswersTable join UsersTable on (_.userid === _.id) if a.topicid === id
+    } yield (a.id, a.timestamp, u.nickname, a.content)
+    db.run(action.sortBy(_._1).drop(mid-before).take(after).result)
   }
 
   def createTopic(topic: Topic, userID: Int): Future[Response] = {

@@ -12,7 +12,7 @@
     <body>
         <header class="topbar">
             <h1 class="fill" id="header-title">
-                <a href="#">
+                <a href="http://localhost:9000">
                     Akka HTTP - Forum Template
                 </a>
             </h1>
@@ -21,7 +21,7 @@
         <h1>Topics</h1>
 
         <a href="http://localhost:9000/posting" class="button">
-            <input type="button" value="Post topic" />
+            <button type="button" class="btn btn-default">Create new topic</button>
         </a>
 
         <table class="table zebra-striped">
@@ -70,6 +70,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Delete</button>
                                         </div>
                                     </div>
 
@@ -80,5 +81,34 @@
                 }
             </tbody>
         </table>
+
+        <script>
+            function deleteTopic(id) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('DELETE', 'http://localhost:9000/topics/' + id, true);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                var secret = document.getElementById('secret').value;
+                xhr.setRequestHeader("WWW-Authenticate", secret);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 204) {
+                        document.getElementById('label').innerText = 'Your secret';
+                        document.getElementById('msg').innerText = xhr.responseText;
+                        document.getElementById('cancel').addEventListener('click', function(){
+                            window.location.href = "http://localhost:9000/topics";
+                        });
+                        $('#myModal').modal('show');
+                    } else if(xhr.status === 401) {
+                        document.getElementById('label').innerText = 'Invalid input';
+                        document.getElementById('msg').innerText = xhr.responseText;
+                        $('#myModal').modal('show');
+                    } else {
+                        document.getElementById('label').innerText = 'Internal error';
+                        document.getElementById('msg').innerText = xhr.responseText;
+                        $('#myModal').modal('show');
+                    }
+                };
+                xhr.send(form_to_json());
+            }
+        </script>
     </body>
 </html>

@@ -9,11 +9,11 @@ import models.DbActionsWithValidation._
 object Controller extends Directives {
 
   def getTopics(sort: String, limit: Int, offset: Int) = {
-    DbActions.getTopics(sort, limit, offset)
+    getTopicsWithValidation(sort, limit, offset)
   }
 
   def getTopic(topicID: Int, mid: Int, before: Int, after: Int) = {
-    DbActions.getAnswers(topicID, mid, before, after).flatMap {
+    getAnswersWithValidation(topicID, mid, before, after).flatMap {
       answers => DbActions.getTopic(topicID).map {
           case IndexedSeq() => None
           case topic => Some((answers, topic))
