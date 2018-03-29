@@ -35,6 +35,9 @@ object Service extends Directives with JsonSupport {
       pathPrefix("resources") {
         getFromDirectory("src/main/resources")
       } ~
+        pathPrefix("javascript") {
+          getFromDirectory("src/main/twirl/javascript")
+        } ~
       path("posting") {
         get {
           parameters('topic ? "") { topic =>
@@ -83,8 +86,10 @@ object Service extends Directives with JsonSupport {
                     entity(as[String]) { content =>
                       onComplete(modifyTopic(topicID, secret, content)) {
                         case Success(value) => value match {
-                          case Some(x) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"topic modified $x"))
-                          case None => complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"invalid secret"))
+                          case Some(x) =>
+                            complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"topic modified $x"))
+                          case None =>
+                            complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"invalid secret"))
                         }
                         case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
 
@@ -119,7 +124,7 @@ object Service extends Directives with JsonSupport {
                     }
                   }
                 } ~
-                  path(IntNumber) { (answerID) =>
+                  path(IntNumber) { (answerID) => //TODO implement
                     headerValueByName("WWW-Authenticate") { secret =>
                       put {
                         complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modified answer"))

@@ -19,6 +19,9 @@
         </title>
     </head>
     <body>
+        <script src="http://localhost:9000/javascript/commands.js">
+        </script>
+
         <header class="topbar">
             <h1 class="fill" id="header-title">
                 <a href="http://localhost:9000">
@@ -58,7 +61,14 @@
             </form>
         </div>
 
-        <button type="button" class="btn btn-success" onclick="send_request()">Submit</button>
+        @topicID match {
+            case "" => {
+                <button type="button" class="btn btn-success" onclick="send_request('topics')">Submit</button>
+            }
+            case id => {
+                <button type="button" class="btn btn-success" onclick="send_request('topics'+ @id +'answers')">Submit</button>
+            }
+        }
 
             <!-- Modal -->
         <div id="myModal" class="modal fade" role="dialog">
@@ -80,53 +90,5 @@
 
             </div>
         </div>
-
-        <script>
-                function form_to_json() {
-                    var a = document.getElementById("nickname").value;
-                    var b = document.getElementById("email").value;
-                    var c = document.getElementById("subject").value;
-                    var d = document.getElementById("content").value;
-                    var json = `{"user":{"nick":"${a}","email":"${b}"},"subject":"${c}","content":"${d}"}`;
-                    return json
-                }
-
-                function send_request() {
-
-                    var routing;
-                    @topicID match {
-                        case "" => {
-                            routing = "topics";
-                        }
-                        case id => {
-                            routing = "topics/" + @id +"/answers";
-                        }
-                    }
-
-
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('POST', 'http://localhost:9000/' + routing, true);
-                    xhr.setRequestHeader("Content-Type", "application/json");
-                    xhr.onreadystatechange = function () {
-                        if (xhr.readyState === 4 && xhr.status === 201) {
-                            document.getElementById('label').innerText = 'Your secret';
-                            document.getElementById('msg').innerText = xhr.responseText;
-                            document.getElementById('cancel').addEventListener('click', function(){
-                                window.location.href = "http://localhost:9000/topics";
-                            });
-                            $('#myModal').modal('show');
-                        } else if(xhr.status === 401) {
-                            document.getElementById('label').innerText = 'Invalid input';
-                            document.getElementById('msg').innerText = xhr.responseText;
-                            $('#myModal').modal('show');
-                        } else {
-                            document.getElementById('label').innerText = 'Internal error';
-                            document.getElementById('msg').innerText = xhr.responseText;
-                            $('#myModal').modal('show');
-                        }
-                    };
-                    xhr.send(form_to_json());
-                }
-        </script>
     </body>
 </html>
