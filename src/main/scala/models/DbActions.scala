@@ -13,7 +13,7 @@ object DbActions {
         val action = for {
           (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
         } yield (t.id, t.subject, u.nickname, t.timestamp)
-        val action2 = action.sortBy(_._4).drop(offset).take(limit).result
+        val action2 = action.sortBy(_._4.desc).drop(offset).take(limit).result
         db.run(action2)
       case "popular" =>
         val query = sql"""
@@ -52,7 +52,7 @@ object DbActions {
     val action = for {
       (a, u) <- AnswersTable join UsersTable on (_.userid === _.id) if a.topicid === id
     } yield (a.id, a.timestamp, u.nickname, a.content)
-    db.run(action.sortBy(_._1).drop(mid-before).take(after).result)
+    db.run(action.sortBy(_._1.desc).drop(mid-before).take(after).result)
   }
 
   def createTopic(topic: Topic, userID: Int): Future[Response] = {

@@ -5,7 +5,8 @@ function modifyTopic(id) {
 function deleteTopic(id) {
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', 'http://localhost:9000/topics/' + id, true);
-    var secret = document.getElementById('secret').value;
+    var identfy = 'secret-' + id;
+    var secret = document.getElementById(identfy).value;
     xhr.setRequestHeader("WWW-Authenticate", secret);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 204) {
@@ -14,7 +15,8 @@ function deleteTopic(id) {
             document.getElementById('cancel').addEventListener('click', function(){
                 window.location.href = "http://localhost:9000/topics";
             });
-            $('#myModal').modal('hide');
+            var s = "myModal" + id;
+            $('#s').modal('hide');
         } else if(xhr.status === 401) {
             document.getElementById('label').innerText = 'Invalid secret';
             document.getElementById('msg').innerText = xhr.responseText;

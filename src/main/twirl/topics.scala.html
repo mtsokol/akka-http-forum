@@ -5,21 +5,18 @@
     <head>
         <meta charset="UTF-8">
         <title>Topics</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     </head>
     <body>
         <script src="http://localhost:9000/javascript/commands.js">
         </script>
 
-        <header class="topbar">
-            <h1 class="fill" id="header-title">
-                <a href="http://localhost:9000">
-                    Akka HTTP - Forum Template
-                </a>
-            </h1>
-        </header>
+        <nav class="navbar navbar-dark bg-dark">
+            <a class="navbar-brand" href="http://localhost:9000">Akka HTTP - Forum Template</a>
+        </nav>
 
         <h1>Topics</h1>
 
@@ -49,30 +46,31 @@
                              @topic._4
                         </td>
                         <td>
-                            <a href="http://localhost:9000/topics/@topic._1" class="button">
-                                <button type="button" class="btn btn-default btn-lg">Modify</button>
-                            </a>
+
+                            <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal@{topic._1}">Modify</button>
+
                                 <!-- Trigger the modal with a button -->
-                            <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal">Delete</button>
+                            <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal@{topic._1}">Delete</button>
 
                                 <!-- Modal -->
-                            <div id="myModal" class="modal fade" role="dialog">
-                                <div class="modal-dialog">
+                            <div id="myModal@{topic._1}" class="modal fade" tabindex="-1" role="dialog">
+                                <div class="modal-dialog" role="document">
 
                                         <!-- Modal content-->
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
                                             <h4 class="modal-title" id="label">Delete topic @topic._2</h4>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
                                         </div>
                                         <div class="modal-body">
                                             <p id="msg">Insert topic's secret</p>
                                             <div class="controls">
-                                                <input id="secret" type="text">
+                                                <input id="secret-@{topic._1}" type="text" class="form-control">
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-default" data-dismiss="modal" id="cancel">Close</button>
                                             <button type="button" class="btn btn-danger" onclick="deleteTopic(@{topic._1})">Delete</button>
                                         </div>
                                     </div>
@@ -84,5 +82,7 @@
                 }
             </tbody>
         </table>
+
+        <div>Pagination</div>
     </body>
 </html>

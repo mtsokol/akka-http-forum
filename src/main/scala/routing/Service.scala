@@ -75,7 +75,7 @@ object Service extends Directives with JsonSupport {
                   onComplete(getTopic(topicID, mid, before, after)) {
                     case Success(value) => value match {
                       case Some(tuple) => complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topic(tuple._1, tuple._2).toString()))
-                      case None => complete(404, HttpEntity(ContentTypes.`text/html(UTF-8)`, "No such topic"))
+                      case None => complete(404, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.error404().toString()))
                     }
                     case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
                   }
