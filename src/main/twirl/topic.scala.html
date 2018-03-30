@@ -1,4 +1,4 @@
-@(answersOpt: Seq[(Int, String, String, String)], topics: Seq[(String, String, String, String)])
+@(topicID: Int, answersOpt: Seq[(Int, String, String, String)], topics: Seq[(String, String, String, String)])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -20,7 +20,7 @@
 
         <h1>Topic</h1>
 
-        <a href="http://localhost:9000/posting?topic=@topics.head._2">
+        <a href="http://localhost:9000/posting?topic=@topicID">
             <button type="button" class="btn btn-default">answer for this topic</button>
         </a>
         @for(topic <- topics) {
@@ -77,8 +77,8 @@
                                             <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
                                                 <h4 class="modal-title">Delete answer @answer._2</h4>
+                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
                                             </div>
                                             <div class="modal-body">
                                                 <p>Insert topic's secret</p>
@@ -87,7 +87,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-danger">Delete</button>
                                             </div>
                                         </div>
 
@@ -104,6 +104,9 @@
         @answersOpt match {
             case Seq() => {
                 <h4>There is no answers yet</h4>
+            }
+            case _ => {
+
             }
         }
     </body>

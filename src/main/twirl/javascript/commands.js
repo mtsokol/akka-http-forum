@@ -5,24 +5,28 @@ function modifyTopic(id) {
 function deleteTopic(id) {
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', 'http://localhost:9000/topics/' + id, true);
-    var identfy = 'secret-' + id;
-    var secret = document.getElementById(identfy).value;
+    var secr = 'secret-' + id;
+    var msg = 'msg-' + id;
+    var lab = 'label-' + id;
+    var button = 'button-' + id;
+    var button_del = 'button-del' + id;
+    var secret = document.getElementById(secr).value;
     xhr.setRequestHeader("WWW-Authenticate", secret);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 204) {
-            document.getElementById('label').innerText = 'Topic deleted';
-            document.getElementById('msg').innerText = xhr.responseText;
-            document.getElementById('cancel').addEventListener('click', function(){
+            document.getElementById(lab).innerText = 'Topic deleted';
+            document.getElementById(msg).innerText = xhr.responseText;
+            document.getElementById(button).addEventListener('click', function(){
                 window.location.href = "http://localhost:9000/topics";
             });
-            var s = "myModal" + id;
-            $('#s').modal('hide');
+            document.getElementById(secr).style.display = 'none';
+            document.getElementById(button_del).style.display = 'none';
         } else if(xhr.status === 401) {
-            document.getElementById('label').innerText = 'Invalid secret';
-            document.getElementById('msg').innerText = xhr.responseText;
+            document.getElementById(lab).innerText = 'Invalid secret';
+            document.getElementById(msg).innerText = xhr.responseText;
         } else {
-            document.getElementById('label').innerText = 'Internal error';
-            document.getElementById('msg').innerText = xhr.responseText;
+            document.getElementById(lab).innerText = 'Internal error';
+            document.getElementById(msg).innerText = xhr.responseText;
         }
     };
     xhr.send();

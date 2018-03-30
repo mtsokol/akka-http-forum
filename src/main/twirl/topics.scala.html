@@ -24,6 +24,14 @@
             <button type="button" class="btn btn-default">Create new topic</button>
         </a>
 
+        <a href="http://localhost:9000/topics?sort=latest" class="button">
+            <button type="button" class="btn btn-default">Sort by time</button>
+        </a>
+
+        <a href="http://localhost:9000/topics?sort=popular" class="button">
+            <button type="button" class="btn btn-default">Sort by popularity</button>
+        </a>
+
         <table class="table zebra-striped">
             <thead>
                 <tr>
@@ -47,10 +55,10 @@
                         </td>
                         <td>
 
-                            <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal@{topic._1}">Modify</button>
+                            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#ModalModify@{topic._1}">Modify</button>
 
                                 <!-- Trigger the modal with a button -->
-                            <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal@{topic._1}">Delete</button>
+                            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal@{topic._1}">Delete</button>
 
                                 <!-- Modal -->
                             <div id="myModal@{topic._1}" class="modal fade" tabindex="-1" role="dialog">
@@ -59,19 +67,46 @@
                                         <!-- Modal content-->
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h4 class="modal-title" id="label">Delete topic @topic._2</h4>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <h4 class="modal-title" id="label-@{topic._1}">Delete topic @topic._2</h4>
+                                            <button id="button-@{topic._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <p id="msg">Insert topic's secret</p>
+                                            <p id="msg-@{topic._1}">Insert topic's secret</p>
                                             <div class="controls">
                                                 <input id="secret-@{topic._1}" type="text" class="form-control">
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-danger" onclick="deleteTopic(@{topic._1})">Delete</button>
+                                            <button id="button-del-@{topic._1}" type="button" class="btn btn-danger" onclick="deleteTopic(@{topic._1})">Delete</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div id="ModalModify@{topic._1}" class="modal fade" tabindex="-1" role="dialog">
+                                <div class="modal-dialog" role="document">
+
+                                        <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 class="modal-title" id="mod-label-@{topic._1}">Modify topic @topic._2</h4>
+                                            <button id="mod-button-@{topic._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p id="mod-msg-@{topic._1}">Insert topic's secret and new content</p>
+                                            <div class="controls">
+                                                <input id="mod-secret-@{topic._1}" type="text" class="form-control">
+                                                <label for="mod-content">Content:</label>
+                                                <textarea class="form-control" rows="5" id="mod-content"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button id="button-del-@{topic._1}" type="button" class="btn btn-warning" onclick="modifyTopic(@{topic._1})">Modify</button>
                                         </div>
                                     </div>
 
