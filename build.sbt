@@ -15,6 +15,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.slick" %% "slick" % "3.2.2",
   "org.slf4j" % "slf4j-nop" % "1.6.4",
   "com.typesafe.slick" %% "slick-hikaricp" % "3.2.2",
-  "org.postgresql" % "postgresql" % "42.1.4"
+  "org.postgresql" % "postgresql" % "42.1.4",
+  "com.typesafe.akka" %% "akka-testkit" % "2.5.11",
+  "com.typesafe.akka" %% "akka-http-testkit" % "10.1.0",
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 )
 

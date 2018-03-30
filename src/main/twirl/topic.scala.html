@@ -20,7 +20,7 @@
 
         <h1>Topic</h1>
 
-        <a href="http://localhost:9000/posting?topic=@topicID">
+        <a href="http://localhost:9000/posting?topic=@{topicID}">
             <button type="button" class="btn btn-default">answer for this topic</button>
         </a>
         @for(topic <- topics) {
@@ -65,29 +65,57 @@
                             </td>
                             <td>
 
-                                <button type="button" class="btn btn-default btn-lg">Modify</button>
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-modify-@{answer._1}">Modify</button>
 
                                     <!-- Trigger the modal with a button -->
-                                <button type="button" class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal">Delete</button>
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-delete-@{answer._1}">Delete</button>
 
-                                    <!-- Modal -->
-                                <div id="myModal" class="modal fade" role="dialog">
-                                    <div class="modal-dialog">
+                                <div id="modal-delete-@{answer._1}" class="modal fade" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
 
                                             <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h4 class="modal-title">Delete answer @answer._2</h4>
-                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                <h4 class="modal-title" id="del-label-@{answer._1}">Delete topic @answer._2</h4>
+                                                <button id="del-button-@{answer._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
                                             </div>
                                             <div class="modal-body">
-                                                <p>Insert topic's secret</p>
+                                                <p id="del-msg-@{answer._1}">Insert topic's secret</p>
                                                 <div class="controls">
-                                                    <input id="secret" type="text">
+                                                    <input id="del-secret-@{answer._1}" type="text" class="form-control">
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-danger">Delete</button>
+                                                <button id="del-button-action-@{answer._1}" type="button" class="btn btn-danger" onclick="perform_action('DELETE', 'answer', @{topicID}, @{answer._1})">Delete</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div id="modal-modify-@{answer._1}" class="modal fade" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
+
+                                            <!-- Modal content-->
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title" id="mod-label-@{answer._1}">Modify topic @answer._2</h4>
+                                                <button id="mod-button-@{answer._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p id="mod-msg-@{answer._1}">Insert topic's secret and new content</p>
+                                                <div class="controls">
+                                                    <input id="mod-secret-@{answer._1}" type="text" class="form-control">
+                                                    <label for="mod-content-@{answer._1}">Content:</label>
+                                                    <textarea id="mod-content-@{answer._1}" class="form-control" rows="5"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button id="mod-button-action-@{answer._1}" type="button" class="btn btn-warning" onclick="perform_action('PUT', 'answer', @{topicID}, @{answer._1})">Modify</button>
                                             </div>
                                         </div>
 
@@ -103,11 +131,12 @@
 
         @answersOpt match {
             case Seq() => {
-                <h4>There is no answers yet</h4>
+                <h3>There is no answers yet</h3>
             }
             case _ => {
 
             }
         }
+        <div>Pagination</div>
     </body>
 </html>

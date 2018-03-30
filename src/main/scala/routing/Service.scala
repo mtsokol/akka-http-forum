@@ -20,24 +20,22 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
 
 object Service extends Directives with JsonSupport {
 
-  def main(args: Array[String]) {
+  implicit val system = ActorSystem("system")
+  implicit val materializer = ActorMaterializer()
+  implicit val executionContext = system.dispatcher
 
-    implicit val system = ActorSystem("system")
-    implicit val materializer = ActorMaterializer()
-    implicit val executionContext = system.dispatcher
-
-    val route = {
-      path("") {
-        get {
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.index().toString()))
-        }
+  val route = {
+    path("") {
+      get {
+        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.index().toString()))
+      }
+    } ~
+      pathPrefix("css") {
+        getFromDirectory("src/main/twirl/css")
       } ~
-      pathPrefix("resources") {
-        getFromDirectory("src/main/resources")
+      pathPrefix("javascript") {
+        getFromDirectory("src/main/twirl/javascript")
       } ~
-        pathPrefix("javascript") {
-          getFromDirectory("src/main/twirl/javascript")
-        } ~
       path("posting") {
         get {
           parameters('topic ? "") { topic =>
@@ -124,20 +122,42 @@ object Service extends Directives with JsonSupport {
                     }
                   }
                 } ~
-                  path(IntNumber) { (answerID) => //TODO implement
+                  path(IntNumber) { (answerID) =>
                     headerValueByName("WWW-Authenticate") { secret =>
                       put {
-                        complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modified answer"))
+                        entity(as[String]) { content =>
+                          onComplete(modifyAnswer(answerID, secret, content)) {
+                            case Success(value) => value match {
+                              case Some(x) =>
+                                complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modified answer $x"))
+                              case None =>
+                                complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, "invalid secret"))
+                            }
+                            case _ =>
+                              complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                          }
+                        }
+
                       } ~
                         delete {
-                          complete(204, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"delete answer"))
+                          onComplete(deleteAnswer(answerID, secret)) {
+                            case Success(value) => value match {
+                              case None =>
+                                complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, "invalid secret"))
+                              case Some(x) =>
+                                complete(204, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$x deleted"))
+                            }
+                            case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                          }
                         }
                     }
                   }
               }
           }
       }
-    }
+  }
+
+  def main(args: Array[String]) {
 
     val config = ConfigFactory.load()
 
