@@ -35,9 +35,9 @@ function perform_action(method, contentType, topicID, answerID) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && (xhr.status === 204 || xhr.status === 201 )) {
             if(method === 'DELETE') {
-                document.getElementById(lab).innerText = 'Topic deleted';
+                document.getElementById(lab).innerText = contentType + ' deleted';
             } else {
-                document.getElementById(lab).innerText = 'Topic modified';
+                document.getElementById(lab).innerText = contentType + ' modified';
             }
             document.getElementById(msg).innerText = xhr.responseText;
             document.getElementById(button).addEventListener('click', function(){
@@ -46,7 +46,7 @@ function perform_action(method, contentType, topicID, answerID) {
             document.getElementById(secr).style.display = 'none';
             document.getElementById(button_del).style.display = 'none';
         } else if(xhr.status === 401) {
-            document.getElementById(lab).innerText = 'Invalid secret';
+            //document.getElementById(lab).innerText = 'Invalid secret';
             document.getElementById(msg).innerText = xhr.responseText;
         } else {
             document.getElementById(lab).innerText = 'Internal error';
@@ -61,14 +61,15 @@ function perform_action(method, contentType, topicID, answerID) {
         let content = document.getElementById(newContent).value;
         xhr.send(content);
     }
-
-
 }
 
-function form_to_json() {
+function form_to_json(contentType) {
     let a = document.getElementById("nickname").value;
     let b = document.getElementById("email").value;
-    let c = document.getElementById("subject").value;
+    let c = "";
+    if (contentType === 'topics') {
+        c = document.getElementById("subject").value;
+    }
     let d = document.getElementById("content").value;
     return `{"user":{"nick":"${a}","email":"${b}"},"subject":"${c}","content":"${d}"}`
 }
@@ -96,5 +97,9 @@ function send_request(url) {
             $('#myModal').modal('show');
         }
     };
-    xhr.send(form_to_json());
+    xhr.send(form_to_json(url));
+}
+
+function getHost(path) {
+    return location.host + path
 }

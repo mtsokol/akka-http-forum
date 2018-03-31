@@ -48,25 +48,37 @@
                     <label for="email">Email:</label>
                     <input type="email" class="form-control" id="email">
                 </div>
-                <div class="form-group">
-                    <label for="subject">Subject:</label>
-                    <input type="text" class="form-control" id="subject">
-                </div>
+                @topicID match {
+                    case "" => {
+                        <div class="form-group">
+                            <label for="subject">Subject:</label>
+                            <input type="text" class="form-control" id="subject">
+                        </div>
+                    }
+                    case id => {
+
+                    }
+                }
                 <div class="form-group">
                     <label for="content">Content:</label>
                     <textarea class="form-control" rows="5" id="content"></textarea>
                 </div>
             </form>
+
+            <div class="d-flex justify-content-end">
+            @topicID match {
+                case "" => {
+                    <button type="button" class="btn btn-success" onclick="send_request('topics')">Submit</button>
+                }
+                case id => {
+                    <button type="button" class="btn btn-success" onclick="send_request('topics/'+ @id +'/answers')">Submit</button>
+                }
+            }
+            </div>
+
         </div>
 
-        @topicID match {
-            case "" => {
-                <button type="button" class="btn btn-success" onclick="send_request('topics')">Submit</button>
-            }
-            case id => {
-                <button type="button" class="btn btn-success" onclick="send_request('topics/'+ @id +'/answers')">Submit</button>
-            }
-        }
+
 
             <!-- Modal -->
         <div id="myModal" class="modal fade" role="dialog">

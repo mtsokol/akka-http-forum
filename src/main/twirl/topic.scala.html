@@ -76,7 +76,7 @@
                                             <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h4 class="modal-title" id="del-label-@{answer._1}">Delete topic @answer._2</h4>
+                                                <h4 class="modal-title" id="del-label-@{answer._1}">Delete topic @answer._1</h4>
                                                 <button id="del-button-@{answer._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
@@ -101,7 +101,7 @@
                                             <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h4 class="modal-title" id="mod-label-@{answer._1}">Modify topic @answer._2</h4>
+                                                <h4 class="modal-title" id="mod-label-@{answer._1}">Modify topic @answer._1</h4>
                                                 <button id="mod-button-@{answer._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
@@ -137,6 +137,13 @@
 
             }
         }
-        <div>Pagination</div>
+        <div class="d-flex justify-content-center">
+            <ul class="pagination">
+                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics/@topicID/answers?mid=0&before=0&after=20">1</a></li>
+                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics/@topicID/answers?mid=20&before=10&after=20">2</a></li>
+                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics/@topicID/answers?mid=40&before=10&after=20">3</a></li>
+                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics/@topicID/answers?mid=60&before=10&after=20">4</a></li>
+            </ul>
+        </div>
     </body>
 </html>

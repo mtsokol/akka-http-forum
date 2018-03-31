@@ -36,7 +36,7 @@ object DbScheme {
 
     def * = (id, userid, timestamp, secret, subject, content)
 
-    def supplier = foreignKey("topics_users_id_fk", id, UsersTable)(_.id)
+    def supplier = foreignKey("topics_users_id_fk", id, UsersTable)(_.id, onDelete=ForeignKeyAction.Cascade)
   }
 
   val TopicsTable = TableQuery[Topics]
@@ -56,9 +56,9 @@ object DbScheme {
 
     def * = (id, userid, topicid, timestamp, secret, content)
 
-    def supplier = foreignKey("answers_users_id_fk", id, UsersTable)(_.id)
+    def supplier = foreignKey("answers_users_id_fk", id, UsersTable)(_.id, onDelete=ForeignKeyAction.Cascade)
 
-    def supplier2 = foreignKey("answers_topics_id_fk", id, TopicsTable)(_.id)
+    def supplier2 = foreignKey("answers_topics_id_fk", id, TopicsTable)(_.id, onDelete=ForeignKeyAction.Cascade)
   }
 
   val AnswersTable = TableQuery[Answers]
