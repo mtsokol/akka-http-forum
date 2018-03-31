@@ -86,15 +86,15 @@ function send_request(url) {
             document.getElementById('cancel').addEventListener('click', function(){
                 window.location.href = "http://localhost:9000/topics";
             });
-            $('#myModal').modal('show');
+            $('#myModal').modal({backdrop: 'static', keyboard: false});
         } else if(xhr.status === 401) {
             document.getElementById('label').innerText = 'Invalid input';
             document.getElementById('msg').innerText = xhr.responseText;
-            $('#myModal').modal('show');
+            $('#myModal').modal({backdrop: 'static', keyboard: false});
         } else {
             document.getElementById('label').innerText = 'Internal error';
             document.getElementById('msg').innerText = xhr.responseText;
-            $('#myModal').modal('show');
+            $('#myModal').modal({backdrop: 'static', keyboard: false});
         }
     };
     xhr.send(form_to_json(url));

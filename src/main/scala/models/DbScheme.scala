@@ -63,5 +63,23 @@ object DbScheme {
 
   val AnswersTable = TableQuery[Answers]
 
+  class Popular(tag: Tag) extends Table[(Int, String, String, String, String)](tag,"popular") {
+    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+
+    def subject = column[String]("subject")
+
+    def a_time = column[String]("timestamp")
+
+    def nickname = column[String]("nickname")
+
+    def timestamp = column[String]("timestamp")
+
+    def * = (id, subject, a_time, nickname, timestamp)
+  }
+
+  val PopularView = TableQuery[Popular]
+
   val db = Database.forConfig("dbconnection")
+
+
 }

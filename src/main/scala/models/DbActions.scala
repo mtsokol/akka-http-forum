@@ -16,13 +16,8 @@ object DbActions {
         val action2 = action.sortBy(_._4.desc).drop(offset).take(limit).result
         db.run(action2)
       case "popular" =>
-        val query = sql"""
-                     |SELECT t.id, t.subject,
-                     |  (SELECT a.timestamp FROM answers as a INNER JOIN topics AS t2 ON a.topic_id = t2.id WHERE t.id = t2.id
-                     |  GROUP BY t2.id, a.timestamp ORDER BY a.timestamp LIMIT 1) AS xd, users.nickname, t.timestamp FROM topics
-                     |  AS t INNER JOIN users ON t.user_id = users.id ORDER BY xd
-       """.as[(Int, String, String, String, String)].map(x => x.map(y => (y._1, y._2, y._4, y._5)))
-        db.run(query)
+        val action = PopularView.drop(offset).take(limit).map(x => (x.id, x.subject, x.nickname, x.timestamp)).result
+        db.run(action)
       case _ => Future { Seq() }
     }
   }
