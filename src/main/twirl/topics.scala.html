@@ -11,24 +11,24 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     </head>
     <body>
-        <script src="http://localhost:9000/javascript/commands.js">
+        <script src="javascript/commands.js">
         </script>
 
         <nav class="navbar navbar-dark bg-dark">
-            <a class="navbar-brand" href="http://localhost:9000">Akka HTTP - Forum Template</a>
+            <a class="navbar-brand" href="/">Akka HTTP - Forum Template</a>
         </nav>
 
         <h1>Topics</h1>
 
-        <a href="http://localhost:9000/posting" class="button">
+        <a href="/posting" class="button">
             <button type="button" class="btn btn-default">Create new topic</button>
         </a>
 
-        <a href="http://localhost:9000/topics?sort=latest" class="button">
+        <a href="/topics?sort=latest" class="button">
             <button type="button" class="btn btn-default">Sort by time</button>
         </a>
 
-        <a href="http://localhost:9000/topics?sort=popular" class="button">
+        <a href="/topics?sort=popular" class="button">
             <button type="button" class="btn btn-default">Sort by popularity</button>
         </a>
 
@@ -45,7 +45,7 @@
                 @for(topic <- topics) {
                     <tr>
                         <td>
-                            <a href="http://localhost:9000/topics/@topic._1">@topic._2</a>
+                            <a href="/topics/@topic._1">@topic._2</a>
                         </td>
                         <td>
                             @topic._3
@@ -119,10 +119,10 @@
         </table>
         <div class="d-flex justify-content-center">
             <ul class="pagination">
-                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics?limit=20&offset=0">1</a></li>
-                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics?limit=20&offset=20">2</a></li>
-                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics?limit=20&offset=40">3</a></li>
-                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics?limit=20&offset=60">4</a></li>
+                <li class="page-item"><a class="page-link" href="/topics?limit=20&offset=0">1</a></li>
+                <li class="page-item"><a class="page-link" href="/topics?limit=20&offset=20">2</a></li>
+                <li class="page-item"><a class="page-link" href="/topics?limit=20&offset=40">3</a></li>
+                <li class="page-item"><a class="page-link" href="/topics?limit=20&offset=60">4</a></li>
             </ul>
         </div>
     </body>

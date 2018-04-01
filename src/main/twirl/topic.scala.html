@@ -11,16 +11,16 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     </head>
     <body>
-        <script src="http://localhost:9000/javascript/commands.js">
+        <script src="../javascript/commands.js">
         </script>
 
         <nav class="navbar navbar-dark bg-dark">
-            <a class="navbar-brand" href="http://localhost:9000">Akka HTTP - Forum Template</a>
+            <a class="navbar-brand" href="/">Akka HTTP - Forum Template</a>
         </nav>
 
         <h1>Topic</h1>
 
-        <a href="http://localhost:9000/posting?topic=@{topicID}">
+        <a href="/posting?topic=@{topicID}">
             <button type="button" class="btn btn-default">answer for this topic</button>
         </a>
         @for(topic <- topics) {
@@ -139,10 +139,10 @@
         }
         <div class="d-flex justify-content-center">
             <ul class="pagination">
-                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics/@topicID?mid=0&before=0&after=20">1</a></li>
-                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics/@topicID?mid=20&before=10&after=20">2</a></li>
-                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics/@topicID?mid=40&before=10&after=20">3</a></li>
-                <li class="page-item"><a class="page-link" href="http://localhost:9000/topics/@topicID?mid=60&before=10&after=20">4</a></li>
+                <li class="page-item"><a class="page-link" href="/topics/@topicID?mid=0&before=0&after=20">1</a></li>
+                <li class="page-item"><a class="page-link" href="/topics/@topicID?mid=20&before=10&after=20">2</a></li>
+                <li class="page-item"><a class="page-link" href="/topics/@topicID?mid=40&before=10&after=20">3</a></li>
+                <li class="page-item"><a class="page-link" href="/topics/@topicID?mid=60&before=10&after=20">4</a></li>
             </ul>
         </div>
     </body>

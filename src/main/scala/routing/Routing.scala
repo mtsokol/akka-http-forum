@@ -18,16 +18,17 @@ trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val topicFormat = jsonFormat3(Topic)
 }
 
-object Service extends Directives with JsonSupport {
+object Routing extends Directives with JsonSupport {
 
   implicit val system = ActorSystem("system")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
+  val content = ContentTypes.`text/html(UTF-8)`
 
   val route = {
     path("") {
       get {
-        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.index().toString()))
+        complete(200, HttpEntity(content, html.index().toString))
       }
     } ~
       pathPrefix("css") {
@@ -36,10 +37,13 @@ object Service extends Directives with JsonSupport {
       pathPrefix("javascript") {
         getFromDirectory("src/main/twirl/javascript")
       } ~
+      pathPrefix("images") {
+        getFromDirectory("src/main/twirl/images")
+      } ~
       path("posting") {
         get {
           parameters('topic ? "") { topic =>
-            complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, html.posting(topic).toString()))
+            complete(200, HttpEntity(content, html.posting(topic).toString()))
           }
         }
       } ~
@@ -47,10 +51,10 @@ object Service extends Directives with JsonSupport {
         pathEnd {
           get {
             parameters('sort ? "latest", 'limit ? 20, 'offset ? 0) { (sort, limit, offset) =>
-              onComplete(getTopics(sort, limit, offset)) {
+              onComplete(getTopics(SortType.parse(sort), limit, offset)) {
                 case Success(value) =>
-                  complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topics(value).toString()))
-                case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                  complete(200, HttpEntity(content, html.topics(value).toString()))
+                case _ => complete(500, HttpEntity(content, "internal error"))
               }
             }
           } ~
@@ -58,10 +62,10 @@ object Service extends Directives with JsonSupport {
               entity(as[Topic]) { topic =>
                 onComplete(createTopic(topic)) {
                   case Success(response) => response match {
-                    case models.Success(msg) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, msg))
-                    case Failure(msg) => complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, msg))
+                    case models.Success(msg) => complete(201, msg)
+                    case Failure(msg) => complete(401, msg)
                   }
-                  case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                  case _ => complete(500, "internal error")
                 }
               }
             }
@@ -72,10 +76,11 @@ object Service extends Directives with JsonSupport {
                 parameters('mid ? 0, 'before ? 0, 'after ? 50) { (mid, before, after) =>
                   onComplete(getTopic(topicID, mid, before, after)) {
                     case Success(value) => value match {
-                      case Some(tuple) => complete(200, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.topic(topicID, tuple._1, tuple._2).toString()))
-                      case None => complete(404, HttpEntity(ContentTypes.`text/html(UTF-8)`, html.error404().toString()))
+                      case Some(tuple) => complete(200, HttpEntity(content,
+                        html.topic(topicID, tuple._1, tuple._2).toString))
+                      case None => complete(404, HttpEntity(content, html.error404().toString))
                     }
-                    case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                    case _ => complete(500, HttpEntity(content, "internal error"))
                   }
                 }
               } ~
@@ -85,11 +90,11 @@ object Service extends Directives with JsonSupport {
                       onComplete(modifyTopic(topicID, secret, content)) {
                         case Success(value) => value match {
                           case Some(x) =>
-                            complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"topic modified $x"))
+                            complete(201, s"topic modified $x")
                           case None =>
-                            complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"invalid secret"))
+                            complete(401, "invalid secret")
                         }
-                        case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                        case _ => complete(500, "internal error")
 
                       }
                     }
@@ -98,11 +103,11 @@ object Service extends Directives with JsonSupport {
                       onComplete(deleteTopic(topicID, secret)) {
                         case Success(value) => value match {
                           case None =>
-                            complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, "invalid secret"))
+                            complete(401, "invalid secret")
                           case Some(stat) =>
-                            complete(204, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$stat deleted"))
+                            complete(204, s"$stat deleted")
                         }
-                        case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                        case _ => complete(500, "internal error")
                       }
                     }
                 }
@@ -113,10 +118,10 @@ object Service extends Directives with JsonSupport {
                     entity(as[Answer]) { answer =>
                       onComplete(createAnswer(answer, topicID)) {
                         case Success(response) => response match {
-                          case models.Success(msg) => complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, msg))
-                          case Failure(msg) => complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, msg))
+                          case models.Success(msg) => complete(201, msg)
+                          case Failure(msg) => complete(401, msg)
                         }
-                        case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"internal error"))
+                        case _ => complete(500, "internal error")
                       }
 
                     }
@@ -129,12 +134,12 @@ object Service extends Directives with JsonSupport {
                           onComplete(modifyAnswer(answerID, secret, content)) {
                             case Success(value) => value match {
                               case Some(x) =>
-                                complete(201, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"modified answer $x"))
+                                complete(201, "modified answer $x")
                               case None =>
-                                complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, "invalid secret"))
+                                complete(401, "invalid secret")
                             }
                             case _ =>
-                              complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                              complete(500, "internal error")
                           }
                         }
 
@@ -143,11 +148,11 @@ object Service extends Directives with JsonSupport {
                           onComplete(deleteAnswer(answerID, secret)) {
                             case Success(value) => value match {
                               case None =>
-                                complete(401, HttpEntity(ContentTypes.`text/html(UTF-8)`, "invalid secret"))
+                                complete(401, "invalid secret")
                               case Some(x) =>
-                                complete(204, HttpEntity(ContentTypes.`text/html(UTF-8)`, s"$x deleted"))
+                                complete(204, s"$x deleted")
                             }
-                            case _ => complete(500, HttpEntity(ContentTypes.`text/html(UTF-8)`, "internal error"))
+                            case _ => complete(500, "internal error")
                           }
                         }
                     }

@@ -1,31 +1,33 @@
 package models
 
 import models.DbScheme._
+import models.SortType._
+import models.ContentType._
 import slick.jdbc.PostgresProfile.api._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object DbActions {
 
-  def getTopics(sort: String, limit: Int, offset: Int): Future[Seq[(Int, String, String, String)]] = {
+  def getTopics(sort: SortType, limit: Int, offset: Int): Future[Seq[(Int, String, String, String)]] = {
     sort match {
-      case "latest" =>
+      case Latest =>
         val action = for {
           (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
         } yield (t.id, t.subject, u.nickname, t.timestamp)
         val action2 = action.sortBy(_._4.desc).drop(offset).take(limit).result
         db.run(action2)
-      case "popular" =>
+      case Popular =>
         val action = PopularView.drop(offset).take(limit).map(x => (x.id, x.subject, x.nickname, x.timestamp)).result
         db.run(action)
       case _ => Future { Seq() }
     }
   }
 
-  def checkUser(user: User): Future[Seq[(Int, String, String)]] = {
+  def checkUser(user: User): Future[Seq[User_db]] = {
     val action = UsersTable.filter(u => u.nickname === user.nick
       && u.email === user.email).result
-    db.run(action)
+    db.run(action.map(_.map(y => User_db(y._1, y._2, y._3))))
   }
 
   def createUser(user: User): Future[Int] = {
@@ -40,7 +42,7 @@ object DbActions {
       (t, u) <- TopicsTable join UsersTable on (_.userid === _.id) if t.id === topicID
     } yield (t.subject, t.timestamp, t.content, u.nickname)
 
-    db.run(action.result)
+    db.run(action.result) //.map(_.map(y => Topic_db(1,y._2,y._3)))
   }
 
   def getAnswers(id: Int, mid: Int, before: Int, after: Int) = {
@@ -92,10 +94,10 @@ object DbActions {
     db.run(action)
   }
 
-  def validateSecret(kind: String, id: Int, secret: String) = {
+  def validateSecret(kind: ContentType, id: Int, secret: String) = {
     val q = kind match {
-      case "Answer" => AnswersTable.filter(x => x.id === id && x.secret === secret)
-      case "Topic" => TopicsTable.filter(x => x.id === id && x.secret === secret)
+      case Answers => AnswersTable.filter(x => x.id === id && x.secret === secret)
+      case Topics => TopicsTable.filter(x => x.id === id && x.secret === secret)
     }
     val action = q.result
 

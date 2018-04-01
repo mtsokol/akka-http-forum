@@ -1,9 +1,10 @@
-import akka.http.scaladsl.model.{HttpEntity, HttpMethods, HttpRequest, MediaTypes}
+import akka.http.scaladsl.model._
 import org.scalatest.{Matchers, WordSpec}
 import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.ByteString
-import routing.Service.route
+import routing.Routing.route
 
 class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
 
@@ -15,19 +16,21 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
 
   val postRequest = HttpRequest(
     HttpMethods.POST,
+
     uri = "/topics",
     entity = HttpEntity(MediaTypes.`application/json`, jsonRequest))
 
-  "Service" should {
+  var id = 0
+  var body = ""
+  var secret = ""
 
+  def spliting(body: String) = {
+    body.split("topics/").tail.head.split("\"").head.toInt
+  }
+
+  "Service" should {
     "respond with index page" in {
       Get() ~> route ~> check {
-        status shouldBe OK
-      }
-    }
-
-    "respond with topics list" in {
-      Get("/topics") ~> route ~> check {
         status shouldBe OK
       }
     }
@@ -47,7 +50,63 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
     "post topic and return secret" in {
       postRequest ~> route ~> check {
         status shouldBe Created
+        secret = responseAs[String]
+        responseAs[String].length shouldBe 7
       }
+    }
+
+    "respond with topics list" in {
+      Get("/topics") ~> route ~> check {
+        body = responseAs[String]
+        id = spliting(body)
+        status shouldBe OK
+      }
+    }
+
+    "modify topic" in {
+      val putRequest = HttpRequest(
+        HttpMethods.PUT,
+        uri = s"/topics/$id",
+        headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate",s"$secret").asInstanceOf[HttpHeader]))
+
+      putRequest ~> route ~> check {
+        status shouldBe Created
+      }
+    }
+
+    "delete topic" in {
+      val deleteRequest = HttpRequest(
+        HttpMethods.DELETE,
+        uri = s"/topics/$id",
+        headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate",s"$secret").asInstanceOf[HttpHeader]))
+
+      deleteRequest ~> route ~> check {
+        status shouldBe NoContent
+      }
+    }
+
+    "return invalid secret error" in {
+
+    }
+
+    "return invalid user params error" in {
+
+    }
+
+    "return invalid content params error" in {
+
+    }
+
+    "post answer and return secret" in {
+
+    }
+
+    "modify answer" in {
+
+    }
+
+    "delete answer" in {
+
     }
 
   }

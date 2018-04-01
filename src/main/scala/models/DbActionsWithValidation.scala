@@ -2,11 +2,12 @@ package models
 
 import com.typesafe.config.ConfigFactory
 import models.DbActions._
+import models.SortType.SortType
 import scala.concurrent.Future
 
 object DbActionsWithValidation {
 
-  val confLimit: Int = ConfigFactory.load().getInt("limit.max")
+  val confLimit: Int = ConfigFactory.load().getInt("constrains.maxListing")
 
   def createUserWithValidation(user: User): Option[Future[Int]] = {
     if (validateUserParams(user)) {
@@ -32,7 +33,7 @@ object DbActionsWithValidation {
     }
   }
 
-  def getTopicsWithValidation(sort: String, limit: Int, offset: Int) = {
+  def getTopicsWithValidation(sort: SortType, limit: Int, offset: Int) = {
     if (validatePaginationTopics(limit, offset)) {
       DbActions.getTopics(sort, limit, offset)
     } else {
