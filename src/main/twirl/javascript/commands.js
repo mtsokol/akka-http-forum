@@ -46,7 +46,6 @@ function perform_action(method, contentType, topicID, answerID) {
             document.getElementById(secr).style.display = 'none';
             document.getElementById(button_del).style.display = 'none';
         } else if(xhr.status === 401) {
-            //document.getElementById(lab).innerText = 'Invalid secret';
             document.getElementById(msg).innerText = xhr.responseText;
         } else {
             document.getElementById(lab).innerText = 'Internal error';

@@ -1,0 +1,26 @@
+@(answer: Int, topicID: Int)
+
+<div id="modal-delete-@{answer}" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+
+            <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="del-label-@{answer}">Delete topic @answer</h4>
+                <button id="del-button-@{answer}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="del-msg-@{answer}">Insert topic's secret</p>
+                <div class="controls">
+                    <input id="del-secret-@{answer}" type="text" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="del-button-action-@{answer}" type="button" class="btn btn-danger" onclick="perform_action('DELETE', 'answer', @{topicID}, @{answer})">Delete</button>
+            </div>
+        </div>
+
+    </div>
+</div>

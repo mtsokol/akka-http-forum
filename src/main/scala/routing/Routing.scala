@@ -10,7 +10,7 @@ import com.typesafe.config.ConfigFactory
 import controllers.Controller._
 import models._
 import spray.json._
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val userFormat = jsonFormat2(User)
@@ -62,8 +62,8 @@ object Routing extends Directives with JsonSupport {
               entity(as[Topic]) { topic =>
                 onComplete(createTopic(topic)) {
                   case Success(response) => response match {
-                    case models.Success(msg) => complete(201, msg)
-                    case Failure(msg) => complete(401, msg)
+                    case Success(msg) => complete(201, msg)
+                    case Failure(ex) => complete(401, ex.getMessage)
                   }
                   case _ => complete(500, "internal error")
                 }
@@ -118,8 +118,8 @@ object Routing extends Directives with JsonSupport {
                     entity(as[Answer]) { answer =>
                       onComplete(createAnswer(answer, topicID)) {
                         case Success(response) => response match {
-                          case models.Success(msg) => complete(201, msg)
-                          case Failure(msg) => complete(401, msg)
+                          case Success(msg) => complete(201, msg)
+                          case Failure(ex) => complete(401, ex.getMessage)
                         }
                         case _ => complete(500, "internal error")
                       }
@@ -165,11 +165,8 @@ object Routing extends Directives with JsonSupport {
   def main(args: Array[String]) {
 
     val config = ConfigFactory.load()
-
-    //val bindingFuture = Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
-    val bindingFuture = Http().bindAndHandle(route, "localhost", 9000)
+    val bindingFuture = Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
 
     println(s"Running on port ${config.getInt("http.port")}...")
-
   }
 }

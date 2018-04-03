@@ -1,3 +1,4 @@
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import org.scalatest.{Matchers, WordSpec}
 import akka.http.scaladsl.model.StatusCodes._
@@ -5,6 +6,8 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.ByteString
 import routing.Routing.route
+import scala.util.{ Failure, Success }
+import scala.concurrent.Future
 
 class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
 
@@ -23,6 +26,15 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
   var id = 0
   var body = ""
   var secret = ""
+
+
+  val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = "http://akka.io"))
+
+  responseFuture
+    .onComplete {
+      case Success(res) => println(res)
+      case Failure(_)   => sys.error("something wrong")
+    }
 
   def spliting(body: String) = {
     body.split("topics/").tail.head.split("\"").head.toInt

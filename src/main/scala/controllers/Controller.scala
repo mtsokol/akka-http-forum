@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Directives
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import models.DbActionsWithValidation._
+import scala.util.{Failure, Try}
 
 object Controller extends Directives {
 
@@ -24,38 +25,38 @@ object Controller extends Directives {
     }
   }
 
-  def createTopic(topic: Topic): Future[Response] = {
+  def createTopic(topic: Topic): Future[Try[String]] = {
     DbActions.checkUser(topic.user).flatMap {
       case IndexedSeq() => createUserWithValidation(topic.user).fold(
-        Future(Failure("Invalid user params").asInstanceOf[Response])
-      ) { eventualInt =>
-        eventualInt.flatMap(id => createTopicWithValidation(topic, id).fold(
-          Future(Failure("Invalid topic params").asInstanceOf[Response])
+        Future(Failure(new Exception("Invalid user params")).asInstanceOf[Try[String]])
+      ) { eventualID =>
+        eventualID.flatMap(id => createTopicWithValidation(topic, id).fold(
+          Future(Failure(new Exception("Invalid topic params")).asInstanceOf[Try[String]])
         ) {
           eventualResponse => eventualResponse
         })
       }
       case user +: _ => createTopicWithValidation(topic, user.id).fold(
-        Future(Failure("Invalid topic params").asInstanceOf[Response])
+        Future(Failure(new Exception("Invalid topic params")).asInstanceOf[Try[String]])
       ) {
         eventualResponse => eventualResponse
       }
     }
   }
 
-  def createAnswer(answer: Answer, topicID: Int): Future[Response] = {
+  def createAnswer(answer: Answer, topicID: Int): Future[Try[String]] = {
     DbActions.checkUser(answer.user).flatMap {
       case IndexedSeq() => createUserWithValidation(answer.user).fold(
-        Future(Failure("Invalid user params").asInstanceOf[Response])
-      ) { eventualInt =>
-        eventualInt.flatMap(id => createAnswerWithValidation(answer, topicID, id).fold(
-          Future(Failure("Invalid answer params").asInstanceOf[Response])
+        Future(Failure(new Exception("Invalid user params")).asInstanceOf[Try[String]])
+      ) { eventualID =>
+        eventualID.flatMap(id => createAnswerWithValidation(answer, topicID, id).fold(
+          Future(Failure(new Exception("Invalid answer params")).asInstanceOf[Try[String]])
         ) {
           eventualResponse => eventualResponse
         })
       }
       case user +: _ => createAnswerWithValidation(answer, topicID, user.id).fold(
-        Future(Failure("Invalid answer params").asInstanceOf[Response])
+        Future(Failure(new Exception("Invalid answer params")).asInstanceOf[Try[String]])
       ) {
         eventualResponse => eventualResponse
       }
@@ -84,7 +85,7 @@ object Controller extends Directives {
     }
   }
 
-  def deleteTopic(topicID: Int, secret: String): Future[Object] = {
+  def deleteTopic(topicID: Int, secret: String): Future[Option[Int]] = {
     DbActions.validateSecret(Topics, topicID, secret).flatMap {
       case _ +: _ => for {
         result <- DbActions.deleteTopic(topicID)
@@ -95,7 +96,7 @@ object Controller extends Directives {
     }
   }
 
-  def deleteAnswer(answerID: Int, secret: String): Future[Object] = {
+  def deleteAnswer(answerID: Int, secret: String): Future[Option[Int]] = {
     DbActions.validateSecret(Answers, answerID, secret).flatMap {
       case _ +: _ => for {
         result <- DbActions.deleteAnswer(answerID)

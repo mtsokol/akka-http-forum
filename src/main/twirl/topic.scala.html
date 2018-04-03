@@ -1,14 +1,20 @@
-@(topicID: Int, answersOpt: Seq[(Int, String, String, String)], topics: Seq[(String, String, String, String)])
+@import models._
+
+@(topicID: Int, answersOpt: Seq[Answer_db], topics: Seq[Topic_with_content_db])
 
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <title>Topic</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     </head>
     <body>
         <script src="../javascript/commands.js">
@@ -25,16 +31,16 @@
         </a>
         @for(topic <- topics) {
             <p class="text-justify">
-                <h2>Topic: @topic._1</h2>
+                <h2>Topic: @topic.subject</h2>
             </p>
             <p class="text-justify">
-                <h4>Timestamp: @topic._2</h4>
+                <h4>Timestamp: @topic.timestamp</h4>
             </p>
             <p class="text-justify">
-                <h4>Content: @topic._3</h4>
+                <h4>Content: @topic.content</h4>
             </p>
             <p class="text-justify">
-                <h4>Author: @topic._4</h4>
+                <h4>Author: @topic.nickname</h4>
             </p>
         }
 
@@ -55,67 +61,67 @@
                     @for(answer <- answers) {
                         <tr>
                             <td>
-                            @answer._4
+                            @answer.content
                             </td>
                             <td>
-                            @answer._3
+                            @answer.nickname
                             </td>
                             <td>
-                            @answer._2
+                            @answer.timestamp
                             </td>
                             <td>
 
-                                <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-modify-@{answer._1}">Modify</button>
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-modify-@{answer.id}">Modify</button>
 
                                     <!-- Trigger the modal with a button -->
-                                <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-delete-@{answer._1}">Delete</button>
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-delete-@{answer.id}">Delete</button>
 
-                                <div id="modal-delete-@{answer._1}" class="modal fade" tabindex="-1" role="dialog">
+                                <div id="modal-delete-@{answer.id}" class="modal fade" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">
 
                                             <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h4 class="modal-title" id="del-label-@{answer._1}">Delete topic @answer._1</h4>
-                                                <button id="del-button-@{answer._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <h4 class="modal-title" id="del-label-@{answer.id}">Delete topic @answer.id</h4>
+                                                <button id="del-button-@{answer.id}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <p id="del-msg-@{answer._1}">Insert topic's secret</p>
+                                                <p id="del-msg-@{answer.id}">Insert topic's secret</p>
                                                 <div class="controls">
-                                                    <input id="del-secret-@{answer._1}" type="text" class="form-control">
+                                                    <input id="del-secret-@{answer.id}" type="text" class="form-control">
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button id="del-button-action-@{answer._1}" type="button" class="btn btn-danger" onclick="perform_action('DELETE', 'answer', @{topicID}, @{answer._1})">Delete</button>
+                                                <button id="del-button-action-@{answer.id}" type="button" class="btn btn-danger" onclick="perform_action('DELETE', 'answer', @{topicID}, @{answer.id})">Delete</button>
                                             </div>
                                         </div>
 
                                     </div>
                                 </div>
 
-                                <div id="modal-modify-@{answer._1}" class="modal fade" tabindex="-1" role="dialog">
+                                <div id="modal-modify-@{answer.id}" class="modal fade" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">
 
                                             <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h4 class="modal-title" id="mod-label-@{answer._1}">Modify topic @answer._1</h4>
-                                                <button id="mod-button-@{answer._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <h4 class="modal-title" id="mod-label-@{answer.id}">Modify topic @answer.id</h4>
+                                                <button id="mod-button-@{answer.id}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <p id="mod-msg-@{answer._1}">Insert topic's secret and new content</p>
+                                                <p id="mod-msg-@{answer.id}">Insert topic's secret and new content</p>
                                                 <div class="controls">
-                                                    <input id="mod-secret-@{answer._1}" type="text" class="form-control">
-                                                    <label for="mod-content-@{answer._1}">Content:</label>
-                                                    <textarea id="mod-content-@{answer._1}" class="form-control" rows="5"></textarea>
+                                                    <input id="mod-secret-@{answer.id}" type="text" class="form-control">
+                                                    <label for="mod-content-@{answer.id}">Content:</label>
+                                                    <textarea id="mod-content-@{answer.id}" class="form-control" rows="5"></textarea>
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button id="mod-button-action-@{answer._1}" type="button" class="btn btn-warning" onclick="perform_action('PUT', 'answer', @{topicID}, @{answer._1})">Modify</button>
+                                                <button id="mod-button-action-@{answer.id}" type="button" class="btn btn-warning" onclick="perform_action('PUT', 'answer', @{topicID}, @{answer.id})">Modify</button>
                                             </div>
                                         </div>
 

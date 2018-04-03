@@ -4,6 +4,7 @@ import com.typesafe.config.ConfigFactory
 import models.DbActions._
 import models.SortType.SortType
 import scala.concurrent.Future
+import scala.util.Try
 
 object DbActionsWithValidation {
 
@@ -17,7 +18,7 @@ object DbActionsWithValidation {
     }
   }
 
-  def createTopicWithValidation(topic: Topic, userID: Int): Option[Future[Response]] = {
+  def createTopicWithValidation(topic: Topic, userID: Int): Option[Future[Try[String]]] = {
     if (validateContent(topic)) {
       Some(createTopic(topic: Topic, userID: Int))
     } else {
@@ -25,7 +26,7 @@ object DbActionsWithValidation {
     }
   }
 
-  def createAnswerWithValidation(answer: Answer, topicID: Int, userID: Int): Option[Future[Response]] = {
+  def createAnswerWithValidation(answer: Answer, topicID: Int, userID: Int): Option[Future[Try[String]]] = {
     if (validateContent(answer)) {
       Some(createAnswer(answer: Answer, topicID: Int, userID: Int))
     } else {
@@ -70,7 +71,7 @@ object DbActionsWithValidation {
     user.email.length < 30
   }
 
-  private def validateContent(contents: Contents) = contents match {
+  private def validateContent(contents: InputContents) = contents match {
     case t: Topic => t.subject.length > 1 && t.subject.length < 200 &&
      t.content.length > 3 && t.content.length < 1000
     case a: Answer => a.content.length > 1 && a.content.length < 1000

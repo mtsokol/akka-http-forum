@@ -1,4 +1,6 @@
-@(topics: Seq[(Int, String, String, String)])
+@import models.Topic_db
+
+@(topics: Seq[Topic_db])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -45,68 +47,68 @@
                 @for(topic <- topics) {
                     <tr>
                         <td>
-                            <a href="/topics/@topic._1">@topic._2</a>
+                            <a href="/topics/@topic.id">@topic.subject</a>
                         </td>
                         <td>
-                            @topic._3
+                            @topic.nickname
                         </td>
                         <td>
-                             @topic._4
+                             @topic.timestamp
                         </td>
                         <td>
 
-                            <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-modify-@{topic._1}">Modify</button>
+                            <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-modify-@{topic.id}">Modify</button>
 
                                 <!-- Trigger the modal with a button -->
-                            <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-delete-@{topic._1}">Delete</button>
+                            <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-delete-@{topic.id}">Delete</button>
 
                                 <!-- Modal -->
-                            <div id="modal-delete-@{topic._1}" class="modal fade" tabindex="-1" role="dialog">
+                            <div id="modal-delete-@{topic.id}" class="modal fade" tabindex="-1" role="dialog">
                                 <div class="modal-dialog" role="document">
 
                                         <!-- Modal content-->
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h4 class="modal-title" id="del-label-@{topic._1}">Delete topic @topic._2</h4>
-                                            <button id="del-button-@{topic._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <h4 class="modal-title" id="del-label-@{topic.id}">Delete topic @topic.subject</h4>
+                                            <button id="del-button-@{topic.id}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <p id="del-msg-@{topic._1}">Insert topic's secret</p>
+                                            <p id="del-msg-@{topic.id}">Insert topic's secret</p>
                                             <div class="controls">
-                                                <input id="del-secret-@{topic._1}" type="text" class="form-control">
+                                                <input id="del-secret-@{topic.id}" type="text" class="form-control">
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button id="del-button-action-@{topic._1}" type="button" class="btn btn-danger" onclick="perform_action('DELETE', 'topic', @{topic._1})">Delete</button>
+                                            <button id="del-button-action-@{topic.id}" type="button" class="btn btn-danger" onclick="perform_action('DELETE', 'topic', @{topic.id})">Delete</button>
                                         </div>
                                     </div>
 
                                 </div>
                             </div>
 
-                            <div id="modal-modify-@{topic._1}" class="modal fade" tabindex="-1" role="dialog">
+                            <div id="modal-modify-@{topic.id}" class="modal fade" tabindex="-1" role="dialog">
                                 <div class="modal-dialog" role="document">
 
                                         <!-- Modal content-->
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h4 class="modal-title" id="mod-label-@{topic._1}">Modify topic @topic._2</h4>
-                                            <button id="mod-button-@{topic._1}" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <h4 class="modal-title" id="mod-label-@{topic.id}">Modify topic @topic.subject</h4>
+                                            <button id="mod-button-@{topic.id}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
                                         <div class="modal-body">
-                                            <p id="mod-msg-@{topic._1}">Insert topic's secret and new content</p>
+                                            <p id="mod-msg-@{topic.id}">Insert topic's secret and new content</p>
                                             <div class="controls">
-                                                <input id="mod-secret-@{topic._1}" type="text" class="form-control">
-                                                <label for="mod-content-@{topic._1}">Content:</label>
-                                                <textarea id="mod-content-@{topic._1}" class="form-control" rows="5"></textarea>
+                                                <input id="mod-secret-@{topic.id}" type="text" class="form-control">
+                                                <label for="mod-content-@{topic.id}">Content:</label>
+                                                <textarea id="mod-content-@{topic.id}" class="form-control" rows="5"></textarea>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button id="mod-button-action-@{topic._1}" type="button" class="btn btn-warning" onclick="perform_action('PUT', 'topic', @{topic._1})">Modify</button>
+                                            <button id="mod-button-action-@{topic.id}" type="button" class="btn btn-warning" onclick="perform_action('PUT', 'topic', @{topic.id})">Modify</button>
                                         </div>
                                     </div>
 
