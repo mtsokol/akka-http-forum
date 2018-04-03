@@ -11,11 +11,11 @@ import scala.util.{Failure, Try}
 
 object Controller extends Directives {
 
-  def getTopics(sort: SortType, limit: Int, offset: Int) = {
+  def getTopics(sort: SortType, limit: Int, offset: Int): Future[Seq[Topic_db]] = {
     getTopicsWithValidation(sort, limit, offset)
   }
 
-  def getTopic(topicID: Int, mid: Int, before: Int, after: Int) = {
+  def getTopic(topicID: Int, mid: Int, before: Int, after: Int): Future[Option[(Seq[Answer_db], Seq[Topic_with_content_db])]] = {
     getAnswersWithValidation(topicID, mid, before, after).flatMap {
       answers =>
         DbActions.getTopic(topicID).map {

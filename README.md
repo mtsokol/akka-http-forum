@@ -10,7 +10,7 @@ See live template here:
 Project contains REST web service for discussion forum 
 (and also simple frontend created with Twirl and Bootstrap 4).
 
-Features
+#### Features
 * Creating new topic
 * Answering for concrete topic
 * Modifying and deleting answers/topics with given secret

@@ -43,7 +43,7 @@ object Routing extends Directives with JsonSupport {
       path("posting") {
         get {
           parameters('topic ? "") { topic =>
-            complete(200, HttpEntity(content, html.posting(topic).toString()))
+            complete(200, HttpEntity(content, html.posting(topic).toString))
           }
         }
       } ~
@@ -53,7 +53,7 @@ object Routing extends Directives with JsonSupport {
             parameters('sort ? "latest", 'limit ? 20, 'offset ? 0) { (sort, limit, offset) =>
               onComplete(getTopics(SortType.parse(sort), limit, offset)) {
                 case Success(value) =>
-                  complete(200, HttpEntity(content, html.topics(value).toString()))
+                  complete(200, HttpEntity(content, html.topics(value).toString))
                 case _ => complete(500, HttpEntity(content, "internal error"))
               }
             }
@@ -159,6 +159,11 @@ object Routing extends Directives with JsonSupport {
                   }
               }
           }
+      } ~
+      pathPrefix("") {
+        get {
+          complete(404, HttpEntity(content, html.error404().toString))
+        }
       }
   }
 

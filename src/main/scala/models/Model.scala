@@ -6,13 +6,9 @@ case class User(nick: String, email: String) {
   def toTuple = (nick, email)
 }
 
-case class Topic(user: User, subject: String, content: String) extends InputContents {
-  def toTuple = (user.toTuple, subject, content)
-}
+case class Topic(user: User, subject: String, content: String) extends InputContents
 
-case class Answer(user: User, content: String) extends InputContents {
-  def toTuple = (user.toTuple, content)
-}
+case class Answer(user: User, content: String) extends InputContents
 
 object SortType extends Enumeration {
   def parse(str: String): Value = values.find(_.toString.equalsIgnoreCase(str)).getOrElse(Latest)

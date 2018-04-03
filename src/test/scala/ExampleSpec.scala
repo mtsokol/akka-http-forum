@@ -1,46 +1,15 @@
-import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import org.scalatest.{Matchers, WordSpec}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.util.ByteString
 import routing.Routing.route
-import scala.util.{ Failure, Success }
-import scala.concurrent.Future
+import RequestHelpers._
+import models.ContentType._
 
 class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
 
-  val jsonRequest = ByteString(
-    s"""
-       |{"user":{"nick":"testnick","email":"test@mail.com"},
-       |"subject":"testsubject","content":"testcontent"}
-        """.stripMargin)
-
-  val postRequest = HttpRequest(
-    HttpMethods.POST,
-
-    uri = "/topics",
-    entity = HttpEntity(MediaTypes.`application/json`, jsonRequest))
-
-  var id = 0
-  var body = ""
-  var secret = ""
-
-
-  def addContent() = {
-    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = "http://akka.io", entity = jsonRequest))
-
-    responseFuture
-      .onComplete {
-        case Success(res) => println(res.entity)
-        case Failure(_)   => sys.error("something wrong")
-      }
-  }
-
-  def spliting(body: String) = {
-    body.split("topics/").tail.head.split("\"").head.toInt
-  }
+  routing.Routing.main(Array())
 
   "Service" should {
     "respond with index page" in {
@@ -50,77 +19,128 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
     }
 
     "respond with topic and answers" in {
-      Get("/topics/4") ~> route ~> check {
-        status shouldBe OK
+      getTopics(getTopicsRequest).map {
+        id =>
+          Get(s"/topics/$id") ~> route ~> check {
+            status shouldBe OK
+          }
       }
     }
 
     "respond with 404 error" in {
-      Get("/topics/1234") ~> route ~> check {
+      Get("/topics/12345") ~> route ~> check {
         status shouldBe NotFound
       }
     }
 
     "post topic and return secret" in {
-      postRequest ~> route ~> check {
+      postTopicRequest(json) ~> route ~> check {
         status shouldBe Created
-        secret = responseAs[String]
         responseAs[String].length shouldBe 7
       }
     }
 
     "respond with topics list" in {
       Get("/topics") ~> route ~> check {
-        body = responseAs[String]
-        id = spliting(body)
         status shouldBe OK
       }
     }
 
     "modify topic" in {
-      val putRequest = HttpRequest(
-        HttpMethods.PUT,
-        uri = s"/topics/$id",
-        headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate",s"$secret").asInstanceOf[HttpHeader]))
-
-      putRequest ~> route ~> check {
-        status shouldBe Created
+      insertContent(Topics).map {
+        result =>
+          val putRequest = HttpRequest(
+            HttpMethods.PUT,
+            uri = s"/topics/${result._1}",
+            headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
+          putRequest ~> route ~> check {
+            status shouldBe Created
+          }
       }
     }
 
     "delete topic" in {
-      val deleteRequest = HttpRequest(
-        HttpMethods.DELETE,
-        uri = s"/topics/$id",
-        headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate",s"$secret").asInstanceOf[HttpHeader]))
+      insertContent(Topics).map {
+        result =>
+          val deleteRequest = HttpRequest(
+            HttpMethods.DELETE,
+            uri = s"/topics/${result._1}",
+            headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
 
-      deleteRequest ~> route ~> check {
-        status shouldBe NoContent
+          deleteRequest ~> route ~> check {
+            status shouldBe NoContent
+          }
       }
     }
 
     "return invalid secret error" in {
+      insertContent(Topics).map {
+        result =>
+          val deleteRequest = HttpRequest(
+            HttpMethods.DELETE,
+            uri = s"/topics/${result._1}",
+            headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", "ASDFGHJ").asInstanceOf[HttpHeader]))
 
+          deleteRequest ~> route ~> check {
+            status shouldBe NoContent
+          }
+      }
     }
 
     "return invalid user params error" in {
-
+      postTopicRequest(invalidJsonUser) ~> route ~> check {
+        status shouldBe Unauthorized
+        responseAs[String] shouldBe "Invalid user params"
+      }
     }
 
     "return invalid content params error" in {
-
+      postTopicRequest(invalidJsonContent) ~> route ~> check {
+        status shouldBe Unauthorized
+        responseAs[String] shouldBe "Invalid topic params"
+      }
     }
 
     "post answer and return secret" in {
-
+      insertContent(Topics).map {
+        result =>
+          postAnswerRequest(result._1) ~> route ~> check {
+            status shouldBe Created
+            responseAs[String].length shouldBe 7
+          }
+      }
     }
 
     "modify answer" in {
-
+      insertContent(Answers).map {
+        result =>
+          getTopics(getTopicsRequest).map {
+            topicID =>
+              val putRequest = HttpRequest(
+                HttpMethods.PUT,
+                uri = s"/topics/${result._1}/answers/$topicID",
+                headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
+              putRequest ~> route ~> check {
+                status shouldBe Created
+              }
+          }
+      }
     }
 
     "delete answer" in {
-
+      insertContent(Answers).map {
+        result =>
+          getTopics(getTopicsRequest).map {
+            topicID =>
+              val putRequest = HttpRequest(
+                HttpMethods.DELETE,
+                uri = s"/topics/${result._1}/answers/$topicID",
+                headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
+              putRequest ~> route ~> check {
+                status shouldBe Created
+              }
+          }
+      }
     }
 
   }
