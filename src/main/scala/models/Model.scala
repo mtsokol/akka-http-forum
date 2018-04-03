@@ -2,13 +2,13 @@ package models
 
 trait InputContents
 
-case class User(nick: String, email: String) {
+case class UserInput(nick: String, email: String) {
   def toTuple = (nick, email)
 }
 
-case class Topic(user: User, subject: String, content: String) extends InputContents
+case class TopicInput(user: UserInput, subject: String, content: String) extends InputContents
 
-case class Answer(user: User, content: String) extends InputContents
+case class AnswerInput(user: UserInput, content: String) extends InputContents
 
 object SortType extends Enumeration {
   def parse(str: String): Value = values.find(_.toString.equalsIgnoreCase(str)).getOrElse(Latest)
@@ -23,10 +23,10 @@ object ContentType extends Enumeration {
 
 trait OutputContents
 
-case class User_db(id: Int, nick: String, email: String) extends  OutputContents
+case class User(id: Int, nick: String, email: String) extends  OutputContents
 
-case class Topic_db(id: Int, timestamp: String, nickname: String, subject: String) extends  OutputContents
+case class Topic(id: Int, timestamp: String, nickname: String, subject: String) extends  OutputContents
 
-case class Answer_db(id: Int, timestamp: String, nickname: String,  content: String) extends  OutputContents
+case class Answer(id: Int, timestamp: String, nickname: String, content: String) extends  OutputContents
 
-case class Topic_with_content_db(subject: String, content: String, timestamp: String, nickname: String) extends  OutputContents
+case class TopicWithContent(subject: String, content: String, timestamp: String, nickname: String) extends  OutputContents

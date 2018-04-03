@@ -11,11 +11,11 @@ import scala.util.{Failure, Try}
 
 object Controller extends Directives {
 
-  def getTopics(sort: SortType, limit: Int, offset: Int): Future[Seq[Topic_db]] = {
+  def getTopics(sort: SortType, limit: Int, offset: Int): Future[Seq[Topic]] = {
     getTopicsWithValidation(sort, limit, offset)
   }
 
-  def getTopic(topicID: Int, mid: Int, before: Int, after: Int): Future[Option[(Seq[Answer_db], Seq[Topic_with_content_db])]] = {
+  def getTopic(topicID: Int, mid: Int, before: Int, after: Int): Future[Option[(Seq[Answer], Seq[TopicWithContent])]] = {
     getAnswersWithValidation(topicID, mid, before, after).flatMap {
       answers =>
         DbActions.getTopic(topicID).map {
@@ -25,7 +25,7 @@ object Controller extends Directives {
     }
   }
 
-  def createTopic(topic: Topic): Future[Try[String]] = {
+  def createTopic(topic: TopicInput): Future[Try[String]] = {
     DbActions.checkUser(topic.user).flatMap {
       case IndexedSeq() => createUserWithValidation(topic.user).fold(
         Future(Failure(new Exception("Invalid user params")).asInstanceOf[Try[String]])
@@ -44,7 +44,7 @@ object Controller extends Directives {
     }
   }
 
-  def createAnswer(answer: Answer, topicID: Int): Future[Try[String]] = {
+  def createAnswer(answer: AnswerInput, topicID: Int): Future[Try[String]] = {
     DbActions.checkUser(answer.user).flatMap {
       case IndexedSeq() => createUserWithValidation(answer.user).fold(
         Future(Failure(new Exception("Invalid user params")).asInstanceOf[Try[String]])

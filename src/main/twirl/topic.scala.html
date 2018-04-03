@@ -1,6 +1,6 @@
 @import models._
 
-@(topicID: Int, answersOpt: Seq[Answer_db], topics: Seq[Topic_with_content_db])
+@(topicID: Int, answersOpt: Seq[Answer], topics: Seq[TopicWithContent])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,10 +37,10 @@
                 <h4>Timestamp: @topic.timestamp</h4>
             </p>
             <p class="text-justify">
-                <h4>Content: @topic.content</h4>
+                <h4>Author: @topic.nickname</h4>
             </p>
             <p class="text-justify">
-                <h4>Author: @topic.nickname</h4>
+                <h4>Content: @topic.content</h4>
             </p>
         }
 
@@ -92,7 +92,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button id="del-button-action-@{answer.id}" type="button" class="btn btn-danger" onclick="perform_action('DELETE', 'answer', @{topicID}, @{answer.id})">Delete</button>
+                                                <button id="del-button-action-@{answer.id}" type="button" class="btn btn-danger" onclick="performAction('DELETE', 'answer', @{topicID}, @{answer.id})">Delete</button>
                                             </div>
                                         </div>
 
@@ -118,7 +118,7 @@
                                                 </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button id="mod-button-action-@{answer.id}" type="button" class="btn btn-warning" onclick="perform_action('PUT', 'answer', @{topicID}, @{answer.id})">Modify</button>
+                                                <button id="mod-button-action-@{answer.id}" type="button" class="btn btn-warning" onclick="performAction('PUT', 'answer', @{topicID}, @{answer.id})">Modify</button>
                                             </div>
                                         </div>
 

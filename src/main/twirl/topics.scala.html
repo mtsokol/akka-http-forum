@@ -1,6 +1,6 @@
-@import models.Topic_db
+@import models.Topic
 
-@(topics: Seq[Topic_db])
+@(topics: Seq[Topic])
 
 <!DOCTYPE html>
 <html lang="en">
@@ -82,7 +82,7 @@
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button id="del-button-action-@{topic.id}" type="button" class="btn btn-danger" onclick="perform_action('DELETE', 'topic', @{topic.id})">Delete</button>
+                                            <button id="del-button-action-@{topic.id}" type="button" class="btn btn-danger" onclick="performAction('DELETE', 'topic', @{topic.id})">Delete</button>
                                         </div>
                                     </div>
 
@@ -108,7 +108,7 @@
                                             </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button id="mod-button-action-@{topic.id}" type="button" class="btn btn-warning" onclick="perform_action('PUT', 'topic', @{topic.id})">Modify</button>
+                                            <button id="mod-button-action-@{topic.id}" type="button" class="btn btn-warning" onclick="performAction('PUT', 'topic', @{topic.id})">Modify</button>
                                         </div>
                                     </div>
 

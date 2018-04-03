@@ -6,6 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import routing.Routing.route
 import RequestHelpers._
 import models.ContentType._
+import scala.collection._
 
 class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
 
@@ -52,7 +53,7 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
           val putRequest = HttpRequest(
             HttpMethods.PUT,
             uri = s"/topics/${result._1}",
-            headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
+            headers = immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
           putRequest ~> route ~> check {
             status shouldBe Created
           }
@@ -65,7 +66,7 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
           val deleteRequest = HttpRequest(
             HttpMethods.DELETE,
             uri = s"/topics/${result._1}",
-            headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
+            headers = immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
 
           deleteRequest ~> route ~> check {
             status shouldBe NoContent
@@ -79,24 +80,24 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
           val deleteRequest = HttpRequest(
             HttpMethods.DELETE,
             uri = s"/topics/${result._1}",
-            headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", "ASDFGHJ").asInstanceOf[HttpHeader]))
+            headers = immutable.Seq(RawHeader("WWW-Authenticate", "ASDFGHJ").asInstanceOf[HttpHeader]))
 
           deleteRequest ~> route ~> check {
-            status shouldBe NoContent
+            status shouldBe Unauthorized
           }
       }
     }
 
     "return invalid user params error" in {
       postTopicRequest(invalidJsonUser) ~> route ~> check {
-        status shouldBe Unauthorized
+        status shouldBe BadRequest
         responseAs[String] shouldBe "Invalid user params"
       }
     }
 
     "return invalid content params error" in {
       postTopicRequest(invalidJsonContent) ~> route ~> check {
-        status shouldBe Unauthorized
+        status shouldBe BadRequest
         responseAs[String] shouldBe "Invalid topic params"
       }
     }
@@ -119,7 +120,7 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
               val putRequest = HttpRequest(
                 HttpMethods.PUT,
                 uri = s"/topics/${result._1}/answers/$topicID",
-                headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
+                headers = immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
               putRequest ~> route ~> check {
                 status shouldBe Created
               }
@@ -135,7 +136,7 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
               val putRequest = HttpRequest(
                 HttpMethods.DELETE,
                 uri = s"/topics/${result._1}/answers/$topicID",
-                headers = scala.collection.immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
+                headers = immutable.Seq(RawHeader("WWW-Authenticate", s"${result._2}").asInstanceOf[HttpHeader]))
               putRequest ~> route ~> check {
                 status shouldBe Created
               }

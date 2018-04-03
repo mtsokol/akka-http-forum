@@ -1,13 +1,13 @@
-function perform_action(method, contentType, topicID, answerID) {
+function performAction(method, contentType, topicID, answerID) {
     let xhr = new XMLHttpRequest();
-    let  url = 'topics/' + topicID;
+    let url;
     let id;
-    if(contentType === 'answer') {
-        url = url + '/' + 'answers' + '/' + answerID;
+    if (contentType === 'answer') {
+        url = topicID + '/' + 'answers' + '/' + answerID;
         id = answerID;
     } else {
         id = topicID;
-
+        url = 'topics/' + topicID
     }
     let secret;
     let msg;
@@ -15,13 +15,13 @@ function perform_action(method, contentType, topicID, answerID) {
     let button;
     let button_del;
 
-    if(method === 'DELETE') {
+    if (method === 'DELETE') {
         secret = 'del-secret-' + id;
         msg = 'del-msg-' + id;
         label = 'del-label-' + id;
         button = 'del-button-' + id;
         button_del = 'del-button-action-' + id;
-    } else if(method === 'PUT') {
+    } else if (method === 'PUT') {
         secret = 'mod-secret-' + id;
         msg = 'mod-msg-' + id;
         label = 'mod-label-' + id;
@@ -33,19 +33,19 @@ function perform_action(method, contentType, topicID, answerID) {
     let secret_value = document.getElementById(secret).value;
     xhr.setRequestHeader("WWW-Authenticate", secret_value);
     xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && (xhr.status === 204 || xhr.status === 201 )) {
-            if(method === 'DELETE') {
+        if (xhr.readyState === 4 && (xhr.status === 204 || xhr.status === 201)) {
+            if (method === 'DELETE') {
                 document.getElementById(label).innerText = contentType + ' deleted';
             } else {
                 document.getElementById(label).innerText = contentType + ' modified';
             }
             document.getElementById(msg).innerText = xhr.responseText;
-            document.getElementById(button).addEventListener('click', function(){
+            document.getElementById(button).addEventListener('click', function () {
                 window.location.href = "/topics";
             });
             document.getElementById(secret).style.display = 'none';
             document.getElementById(button_del).style.display = 'none';
-        } else if(xhr.status === 401) {
+        } else if (xhr.status === 401) {
             document.getElementById(msg).innerText = xhr.responseText;
         } else {
             document.getElementById(label).innerText = 'Internal error';
@@ -53,7 +53,7 @@ function perform_action(method, contentType, topicID, answerID) {
         }
     };
 
-    if(method === 'DELETE') {
+    if (method === 'DELETE') {
         xhr.send();
     } else {
         let newContent = 'mod-content-' + id;
@@ -62,7 +62,7 @@ function perform_action(method, contentType, topicID, answerID) {
     }
 }
 
-function form_to_json(contentType) {
+function formToJSON(contentType) {
     let a = document.getElementById("nickname").value;
     let b = document.getElementById("email").value;
     let c = "";
@@ -73,7 +73,7 @@ function form_to_json(contentType) {
     return `{"user":{"nick":"${a}","email":"${b}"},"subject":"${c}","content":"${d}"}`
 }
 
-function send_request(url) {
+function sendRequest(url) {
     let xhr = new XMLHttpRequest();
     xhr.open('POST', '/' + url, true);
     xhr.setRequestHeader("Content-Type", "application/json");
@@ -85,7 +85,7 @@ function send_request(url) {
                 window.location.href = "/topics";
             });
             $('#myModal').modal({backdrop: 'static', keyboard: false});
-        } else if(xhr.status === 401) {
+        } else if (xhr.status === 401) {
             document.getElementById('label').innerText = 'Invalid input';
             document.getElementById('msg').innerText = xhr.responseText;
             $('#myModal').modal({backdrop: 'static', keyboard: false});
@@ -95,5 +95,5 @@ function send_request(url) {
             $('#myModal').modal({backdrop: 'static', keyboard: false});
         }
     };
-    xhr.send(form_to_json(url));
+    xhr.send(formToJSON(url));
 }

@@ -10,99 +10,101 @@ import scala.util.{Success, Try}
 
 object DbActions {
 
-  def getTopics(sort: SortType, limit: Int, offset: Int): Future[Seq[Topic_db]] = {
+  def getTopics(sort: SortType, limit: Int, offset: Int): Future[Seq[Topic]] = {
     sort match {
       case Latest =>
         val action = for {
-          (t, u) <- TopicsTable join UsersTable on (_.userid === _.id)
-        } yield (t.id, t.timestamp, u.nickname, t.subject)
+          (topics, users) <- TopicsTable join UsersTable on (_.userid === _.id)
+        } yield (topics.id, topics.timestamp, users.nickname, topics.subject)
         val action2 = action.sortBy(_._2.desc).drop(offset).take(limit).result
-        db.run(action2.map(_.map(y => Topic_db(y._1, y._2, y._3, y._4))))
+        db.run(action2.map(_.map(tuple => Topic(tuple._1, tuple._2, tuple._3, tuple._4))))
       case Popular =>
-        val action = PopularView.drop(offset).take(limit).map(x => (x.id, x.timestamp, x.nickname, x.subject)).result
-        db.run(action.map(_.map(y => Topic_db(y._1, y._2, y._3, y._4))))
+        val action = PopularView.drop(offset).take(limit)
+          .map(record => (record.id, record.timestamp, record.nickname, record.subject)).result
+        db.run(action.map(_.map(tuple => Topic(tuple._1, tuple._2, tuple._3, tuple._4))))
       case _ => Future {
         Seq()
       }
     }
   }
 
-  def checkUser(user: User): Future[Seq[User_db]] = {
+  def checkUser(user: UserInput): Future[Seq[User]] = {
     val action = UsersTable.filter(u => u.nickname === user.nick
       && u.email === user.email).result
-    db.run(action.map(_.map(y => User_db(y._1, y._2, y._3))))
+    db.run(action.map(_.map(user => User(user._1, user._2, user._3))))
   }
 
-  def createUser(user: User): Future[Int] = {
+  def createUser(user: UserInput): Future[Int] = {
     val insertActions =
-      UsersTable.map(x => (x.nickname, x.email)).returning(UsersTable.map(_.id)) += user.toTuple
+      UsersTable.map(users => (users.nickname, users.email)).returning(UsersTable.map(_.id)) += user.toTuple
 
     db.run(insertActions)
   }
 
-  def getTopic(topicID: Int): Future[Seq[Topic_with_content_db]] = {
+  def getTopic(topicID: Int): Future[Seq[TopicWithContent]] = {
     val action = for {
-      (t, u) <- TopicsTable join UsersTable on (_.userid === _.id) if t.id === topicID
-    } yield (t.subject, t.content, t.timestamp, u.nickname)
+      (topics, users) <- TopicsTable join UsersTable on (_.userid === _.id) if topics.id === topicID
+    } yield (topics.subject, topics.content, topics.timestamp, users.nickname)
 
-    db.run(action.result.map(_.map(y => Topic_with_content_db(y._1, y._2, y._3, y._4))))
+    db.run(action.result.map(_.map(tuple => TopicWithContent(tuple._1, tuple._2, tuple._3, tuple._4))))
   }
 
-  def getAnswers(id: Int, mid: Int, before: Int, after: Int): Future[Seq[Answer_db]] = {
+  def getAnswers(id: Int, mid: Int, before: Int, after: Int): Future[Seq[Answer]] = {
     val action = for {
-      (a, u) <- AnswersTable join UsersTable on (_.userid === _.id) if a.topicid === id
-    } yield (a.id, a.timestamp, u.nickname, a.content)
-    db.run(action.sortBy(_._1).drop(mid - before).take(after).result.map(_.map(y => Answer_db(y._1, y._2, y._3, y._4))))
+      (answers, users) <- AnswersTable join UsersTable on (_.userid === _.id) if answers.topicid === id
+    } yield (answers.id, answers.timestamp, users.nickname, answers.content)
+    db.run(action.sortBy(_._1).drop(mid - before).take(after)
+      .result.map(_.map(tuple => Answer(tuple._1, tuple._2, tuple._3, tuple._4))))
   }
 
-  def createTopic(topic: Topic, userID: Int): Future[Try[String]] = {
+  def createTopic(topic: TopicInput, userID: Int): Future[Try[String]] = {
     val secret = SecretGenerator.getSecret
     val insertAction = DBIO.seq(
-      TopicsTable.map(x => (x.userid, x.secret, x.subject, x.content))
+      TopicsTable.map(topics => (topics.userid, topics.secret, topics.subject, topics.content))
         += (userID, secret, topic.subject, topic.content)
     )
     db.run(insertAction).map(_ => Success(secret))
   }
 
-  def createAnswer(answer: Answer, topicID: Int, userID: Int): Future[Try[String]] = {
+  def createAnswer(answer: AnswerInput, topicID: Int, userID: Int): Future[Try[String]] = {
     val secret = SecretGenerator.getSecret
     val insertAction = DBIO.seq(
-      AnswersTable.map(x => (x.userid, x.topicid, x.secret, x.content))
+      AnswersTable.map(answers => (answers.userid, answers.topicid, answers.secret, answers.content))
         += (userID, topicID, secret, answer.content)
     )
     db.run(insertAction).map(_ => Success(secret))
   }
 
-  def modifyTopic(topicID: Int, newContent: String) = {
-    val q = for {t <- TopicsTable if t.id === topicID} yield t.content
-    val updateAction = q.update(newContent)
+  def modifyTopic(topicID: Int, newContent: String): Future[Int] = {
+    val query = for {t <- TopicsTable if t.id === topicID} yield t.content
+    val updateAction = query.update(newContent)
     db.run(updateAction)
   }
 
-  def modifyAnswer(answerID: Int, newContent: String) = {
-    val q = for {t <- AnswersTable if t.id === answerID} yield t.content
-    val updateAction = q.update(newContent)
+  def modifyAnswer(answerID: Int, newContent: String): Future[Int] = {
+    val query = for {t <- AnswersTable if t.id === answerID} yield t.content
+    val updateAction = query.update(newContent)
     db.run(updateAction)
   }
 
-  def deleteTopic(topicID: Int) = {
-    val q = TopicsTable.filter(_.id === topicID)
-    val action = q.delete
+  def deleteTopic(topicID: Int): Future[Int] = {
+    val query = TopicsTable.filter(_.id === topicID)
+    val action = query.delete
     db.run(action)
   }
 
-  def deleteAnswer(answerID: Int) = {
-    val q = AnswersTable.filter(_.id === answerID)
-    val action = q.delete
+  def deleteAnswer(answerID: Int): Future[Int] = {
+    val query = AnswersTable.filter(_.id === answerID)
+    val action = query.delete
     db.run(action)
   }
 
   def validateSecret(kind: ContentType, id: Int, secret: String) = {
-    val q = kind match {
+    val query = kind match {
       case Answers => AnswersTable.filter(x => x.id === id && x.secret === secret)
       case Topics => TopicsTable.filter(x => x.id === id && x.secret === secret)
     }
-    val action = q.result
+    val action = query.result
 
     db.run(action)
   }

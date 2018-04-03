@@ -2,12 +2,16 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.util.ByteString
+import com.typesafe.config.ConfigFactory
 import routing.Routing._
 import scala.concurrent.Future
 import models.ContentType.ContentType
 import models.ContentType._
 
 object RequestHelpers {
+
+  val config = ConfigFactory.load()
+  val url = s"http://${config.getString("http.interface")}:${config.getInt("http.port")}"
 
   val json = ByteString(
     s"""
@@ -29,17 +33,17 @@ object RequestHelpers {
 
   def postTopicRequest(json: ByteString) = HttpRequest(
     HttpMethods.POST,
-    uri = "http://localhost:9000/topics",
+    uri = s"$url/topics",
     entity = HttpEntity(MediaTypes.`application/json`, json))
 
   def postAnswerRequest(topicID: Int) = HttpRequest(
     HttpMethods.POST,
-    uri = s"http://localhost:9000/topics/$topicID/answers",
+    uri = s"$url/topics/$topicID/answers",
     entity = HttpEntity(MediaTypes.`application/json`, json))
 
-  val getTopicsRequest = HttpRequest(uri = "http://localhost:9000/topics")
+  val getTopicsRequest = HttpRequest(uri = s"$url/topics")
 
-  def getTopicRequest(topicID: Int) = HttpRequest(uri = s"http://localhost:9000/topics/$topicID")
+  def getTopicRequest(topicID: Int) = HttpRequest(uri = s"$url/topics/$topicID")
 
   def insertContent(typee: ContentType): Future[(Int, String)] = {
     typee match {
