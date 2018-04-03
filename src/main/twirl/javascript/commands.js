@@ -65,12 +65,14 @@ function performAction(method, contentType, topicID, answerID) {
 function formToJSON(contentType) {
     let a = document.getElementById("nickname").value;
     let b = document.getElementById("email").value;
-    let c = "";
+    let c = "\"\"";
     if (contentType === 'topics') {
         c = document.getElementById("subject").value;
+        c = JSON.stringify(c)
     }
     let d = document.getElementById("content").value;
-    return `{"user":{"nick":"${a}","email":"${b}"},"subject":"${c}","content":"${d}"}`
+    d = JSON.stringify(d);
+    return `{"user":{"nick":"${a}","email":"${b}"},"subject":${c},"content":${d}}`
 }
 
 function sendRequest(url) {
@@ -85,7 +87,7 @@ function sendRequest(url) {
                 window.location.href = "/topics";
             });
             $('#myModal').modal({backdrop: 'static', keyboard: false});
-        } else if (xhr.status === 401) {
+        } else if (xhr.status === 400) {
             document.getElementById('label').innerText = 'Invalid input';
             document.getElementById('msg').innerText = xhr.responseText;
             $('#myModal').modal({backdrop: 'static', keyboard: false});

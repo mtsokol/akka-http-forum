@@ -8,7 +8,7 @@ import RequestHelpers._
 import models.ContentType._
 import scala.collection._
 
-class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
+class RoutingSpec extends WordSpec with Matchers with ScalatestRouteTest {
 
   routing.Routing.main(Array())
 
