@@ -73,16 +73,14 @@
 
                                 <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-modify-@{answer.id}">Modify</button>
 
-                                    <!-- Trigger the modal with a button -->
                                 <button type="button" class="btn btn-default" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#modal-delete-@{answer.id}">Delete</button>
 
                                 <div id="modal-delete-@{answer.id}" class="modal fade" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">
 
-                                            <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h4 class="modal-title" id="del-label-@{answer.id}">Delete topic @answer.id</h4>
+                                                <h4 class="modal-title" id="del-label-@{answer.id}">Delete answer @answer.id</h4>
                                                 <button id="del-button-@{answer.id}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
@@ -104,10 +102,9 @@
                                 <div id="modal-modify-@{answer.id}" class="modal fade" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">
 
-                                            <!-- Modal content-->
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h4 class="modal-title" id="mod-label-@{answer.id}">Modify topic @answer.id</h4>
+                                                <h4 class="modal-title" id="mod-label-@{answer.id}">Modify answer @answer.id</h4>
                                                 <button id="mod-button-@{answer.id}" type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>

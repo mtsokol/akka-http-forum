@@ -28,13 +28,15 @@ class ExampleSpec extends WordSpec with Matchers with ScalatestRouteTest {
   var secret = ""
 
 
-  val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = "http://akka.io"))
+  def addContent() = {
+    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = "http://akka.io", entity = jsonRequest))
 
-  responseFuture
-    .onComplete {
-      case Success(res) => println(res)
-      case Failure(_)   => sys.error("something wrong")
-    }
+    responseFuture
+      .onComplete {
+        case Success(res) => println(res.entity)
+        case Failure(_)   => sys.error("something wrong")
+      }
+  }
 
   def spliting(body: String) = {
     body.split("topics/").tail.head.split("\"").head.toInt

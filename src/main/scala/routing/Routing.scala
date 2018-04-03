@@ -89,8 +89,8 @@ object Routing extends Directives with JsonSupport {
                     entity(as[String]) { content =>
                       onComplete(modifyTopic(topicID, secret, content)) {
                         case Success(value) => value match {
-                          case Some(x) =>
-                            complete(201, s"topic modified $x")
+                          case Some(status) =>
+                            complete(201, s"topic modified $status")
                           case None =>
                             complete(401, "invalid secret")
                         }
@@ -102,10 +102,10 @@ object Routing extends Directives with JsonSupport {
                     delete {
                       onComplete(deleteTopic(topicID, secret)) {
                         case Success(value) => value match {
+                          case Some(status) =>
+                            complete(204, s"topic deleted $status")
                           case None =>
                             complete(401, "invalid secret")
-                          case Some(stat) =>
-                            complete(204, s"$stat deleted")
                         }
                         case _ => complete(500, "internal error")
                       }
@@ -133,8 +133,8 @@ object Routing extends Directives with JsonSupport {
                         entity(as[String]) { content =>
                           onComplete(modifyAnswer(answerID, secret, content)) {
                             case Success(value) => value match {
-                              case Some(x) =>
-                                complete(201, "modified answer $x")
+                              case Some(status) =>
+                                complete(201, s"modified answer $status")
                               case None =>
                                 complete(401, "invalid secret")
                             }
@@ -149,8 +149,8 @@ object Routing extends Directives with JsonSupport {
                             case Success(value) => value match {
                               case None =>
                                 complete(401, "invalid secret")
-                              case Some(x) =>
-                                complete(204, s"$x deleted")
+                              case Some(status) =>
+                                complete(204, s"answer deleted $status")
                             }
                             case _ => complete(500, "internal error")
                           }
@@ -165,7 +165,7 @@ object Routing extends Directives with JsonSupport {
   def main(args: Array[String]) {
 
     val config = ConfigFactory.load()
-    val bindingFuture = Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
+    Http().bindAndHandle(route, config.getString("http.interface"), config.getInt("http.port"))
 
     println(s"Running on port ${config.getInt("http.port")}...")
   }

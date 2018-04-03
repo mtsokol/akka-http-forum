@@ -1,6 +1,6 @@
 function perform_action(method, contentType, topicID, answerID) {
     let xhr = new XMLHttpRequest();
-    let  url = 'http://localhost:9000/topics/' + topicID;
+    let  url = 'topics/' + topicID;
     let id;
     if(contentType === 'answer') {
         url = url + '/' + 'answers' + '/' + answerID;
@@ -9,46 +9,46 @@ function perform_action(method, contentType, topicID, answerID) {
         id = topicID;
 
     }
-    let secr = 'secret-' + id;
-    let msg = 'msg-' + id;
-    let lab = 'label-' + id;
-    let button = 'button-' + id;
-    let button_del = 'button-action-' + id;
+    let secret;
+    let msg;
+    let label;
+    let button;
+    let button_del;
 
     if(method === 'DELETE') {
-        secr = 'del-secret-' + id;
+        secret = 'del-secret-' + id;
         msg = 'del-msg-' + id;
-        lab = 'del-label-' + id;
+        label = 'del-label-' + id;
         button = 'del-button-' + id;
         button_del = 'del-button-action-' + id;
     } else if(method === 'PUT') {
-        secr = 'mod-secret-' + id;
+        secret = 'mod-secret-' + id;
         msg = 'mod-msg-' + id;
-        lab = 'mod-label-' + id;
+        label = 'mod-label-' + id;
         button = 'mod-button-' + id;
         button_del = 'mod-button-action-' + id;
     }
 
     xhr.open(method, url, true);
-    let secret = document.getElementById(secr).value;
-    xhr.setRequestHeader("WWW-Authenticate", secret);
+    let secret_value = document.getElementById(secret).value;
+    xhr.setRequestHeader("WWW-Authenticate", secret_value);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && (xhr.status === 204 || xhr.status === 201 )) {
             if(method === 'DELETE') {
-                document.getElementById(lab).innerText = contentType + ' deleted';
+                document.getElementById(label).innerText = contentType + ' deleted';
             } else {
-                document.getElementById(lab).innerText = contentType + ' modified';
+                document.getElementById(label).innerText = contentType + ' modified';
             }
             document.getElementById(msg).innerText = xhr.responseText;
             document.getElementById(button).addEventListener('click', function(){
-                window.location.href = "http://localhost:9000/topics";
+                window.location.href = "/topics";
             });
-            document.getElementById(secr).style.display = 'none';
+            document.getElementById(secret).style.display = 'none';
             document.getElementById(button_del).style.display = 'none';
         } else if(xhr.status === 401) {
             document.getElementById(msg).innerText = xhr.responseText;
         } else {
-            document.getElementById(lab).innerText = 'Internal error';
+            document.getElementById(label).innerText = 'Internal error';
             document.getElementById(msg).innerText = xhr.responseText;
         }
     };
@@ -74,16 +74,15 @@ function form_to_json(contentType) {
 }
 
 function send_request(url) {
-    let routing = url;
     let xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:9000/' + routing, true);
+    xhr.open('POST', '/' + url, true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 201) {
             document.getElementById('label').innerText = 'Your secret';
             document.getElementById('msg').innerText = xhr.responseText;
             document.getElementById('cancel').addEventListener('click', function(){
-                window.location.href = "http://localhost:9000/topics";
+                window.location.href = "/topics";
             });
             $('#myModal').modal({backdrop: 'static', keyboard: false});
         } else if(xhr.status === 401) {
@@ -97,8 +96,4 @@ function send_request(url) {
         }
     };
     xhr.send(form_to_json(url));
-}
-
-function getHost(path) {
-    return location.host + path
 }
